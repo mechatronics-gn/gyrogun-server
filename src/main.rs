@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::f32::consts::PI;
-use std::thread;
+use std::{env, thread};
+use std::str::FromStr;
 use macroquad::window::clear_background;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpListener;
@@ -8,33 +9,38 @@ use tokio::net::TcpListener;
 use macroquad::prelude::*;
 use macroquad::Window;
 
+#[derive(Debug)]
+enum Message {
+    Click { pos: (f32, f32) },
+    DoubleClick { pos: (f32, f32) },
+    Disconnect,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let args: Vec<String> = env::args().collect();
+
     let addr = "0.0.0.0:11076";
 
     let listener = TcpListener::bind(&addr).await?;
 
-    let (pos_tx, mut pos_rx) = tokio::sync::watch::channel((0.0, 0.0));
+    let client_count = i32::from_str(args.get(1).unwrap_or(&String::from("1")).as_str())?;
 
-    thread::spawn(|| {
-        Window::from_config(
-            Conf {
-                window_title: "gyrogun".to_string(),
-                window_width: 1920,
-                window_height: 1080,
-                high_dpi: true,
-                fullscreen: false,
-                sample_count: 0,
-                window_resizable: false,
-                icon: None,
-                platform: Default::default(),
-            },
-            draw(pos_rx)
-        );
-    });
+    let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
 
-    //loop {
-        let (mut socket, _) = listener.accept().await.unwrap();
+    let (msg_tx, mut msg_rx) = tokio::sync::mpsc::channel(128);
+
+    println!("Server up, waiting for {client_count} clients");
+
+    for i in 0..client_count {
+        let (mut socket, addr) = listener.accept().await.unwrap();
+
+        println!("Connected with client #{i}, {addr}");
+
+        let (pos_tx, pos_rx) = tokio::sync::watch::channel((0.0, 0.0));
+        pos_rxs.push(pos_rx);
+
+        let msg_tx = msg_tx.clone();
 
         tokio::spawn(async move {
             let mut buf = vec![0 as u8; 16];
@@ -50,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let n = socket.read_exact(&mut buf).await;
 
                 if let Err(_) = n {
-                    println!("Closing server");
+                    msg_tx.send((i, Message::Disconnect)).await.unwrap();
                     return;
                 }
 
@@ -65,10 +71,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 let r = [buf[12], buf[13], buf[14], buf[15]];
                 let r = f32::from_be_bytes(r);
-
-                if message_type == 1 {
-                    println!("message_type {message_type} y {:.3} p {:.3} r {:.3}", y, p, r);
-                }
 
                 if state == 0 {
                     if message_type == 1 {
@@ -90,7 +92,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         shooter = shooter_pos(my, ay, by, mp, ap);
                     }
                 } else {
-                    pos_tx.send(screen_pos(my, y, mp, p, shooter)).unwrap();
+                    let pos = screen_pos(my, y, mp, p, shooter);
+                    pos_tx.send(pos).unwrap();
+                    if message_type == 1 {
+                        msg_tx.send((i, Message::Click { pos })).await.unwrap();
+                    }
                 }
 
                 if message_type == 2 {
@@ -99,24 +105,52 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             }
         });
-    //}
+    }
+
+    thread::spawn(|| {
+        Window::from_config(
+            Conf {
+                window_title: "gyrogun".to_string(),
+                window_width: 1920,
+                window_height: 1080,
+                high_dpi: true,
+                fullscreen: false,
+                sample_count: 0,
+                window_resizable: false,
+                icon: None,
+                platform: Default::default(),
+            },
+            draw(pos_rxs)
+        );
+    });
+
+    let mut disconnect_count = 0;
 
     loop {
+        let (client, msg)= msg_rx.recv().await.unwrap();
+        println!("Client #{client}: {:?}", msg);
 
+        if let Message::Disconnect = msg {
+            disconnect_count += 1;
+
+            if disconnect_count == client_count {
+                println!("All clients disconnected, exiting");
+                break;
+            }
+        }
     }
 
     Ok(())
 }
 
-async fn draw(mut pos_rx: tokio::sync::watch::Receiver<(f32, f32)>) {
+async fn draw(mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>>) {
     loop {
         clear_background(WHITE);
         draw_text("IT WORKS!", 20.0, 20.0, 30.0, DARKGRAY);
         draw_circle(960.0 - 540.0, 540.0, 20.0, GREEN);
         draw_circle(960.0 + 540.0, 540.0, 20.0, GREEN);
-        {
+        for pos_rx in &mut pos_rxs {
             let (x, y) = *pos_rx.borrow_and_update();
-            //println!("{:.2} {:.2}", 960.0 + x, 540.0 - y);
             draw_circle(960.0 + x, 540.0 - y, 20.0, RED);
         }
         next_frame().await;
