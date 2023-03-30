@@ -165,7 +165,7 @@ fn shooter_pos(monitor_yaw: f32, a_yaw: f32, b_yaw: f32, monitor_pitch: f32, avg
 
     let x = (a_tan + b_tan) / (a_tan - b_tan) * (-540.0);
     let y = a_tan * (x + 540.0);
-    let h = ((x * x + y * y) * h_tan).sqrt();
+    let h = (x * x + y * y).sqrt() * h_tan;
 
     return (x, y, h);
 }
