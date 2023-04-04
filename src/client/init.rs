@@ -1,0 +1,47 @@
+use crate::client::SensorData;
+
+pub enum InitPhase {
+    WaitMonitor,
+    WaitFirstPoint,
+    WaitSecondPoint,
+}
+
+pub struct InitData {
+    monitor: SensorData,
+    first_point: SensorData,
+    second_point: SensorData,
+}
+
+impl InitData {
+    pub fn new() -> InitData {
+        InitData {
+            monitor: (0.0, 0.0, 0.0),
+            first_point: (0.0, 0.0, 0.0),
+            second_point: (0.0, 0.0, 0.0),
+        }
+    }
+
+    pub fn monitor(&self) -> SensorData {
+        self.monitor
+    }
+
+    pub fn first_point(&self) -> SensorData {
+        self.first_point
+    }
+
+    pub fn second_point(&self) -> SensorData {
+        self.second_point
+    }
+    
+    pub fn set_monitor(&mut self, data: SensorData) {
+        self.monitor = data;
+    }
+    
+    pub fn set_first_point(&mut self, data: SensorData) {
+        self.first_point = data;
+    }
+    
+    pub fn set_second_point(&mut self, data: SensorData) {
+        self.second_point = data;
+    }
+}
