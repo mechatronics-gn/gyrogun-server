@@ -9,11 +9,14 @@ use gyrogun_server::client;
 async fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
 
-    let addr = "0.0.0.0:11076";
+    let client_count = args.get(1).and_then(|x| i32::from_str(x).ok()).unwrap_or(1);
+    let width = args.get(2).and_then(|x| f32::from_str(x).ok()).unwrap_or(1920.0);
+    let height = args.get(3).and_then(|x| f32::from_str(x).ok()).unwrap_or(1080.0);
+    let addr = args.get(4).and_then(|x| Some(x.as_str())).unwrap_or("0.0.0.0:11076");
+
+    let window_size = (width, height);
 
     let listener = TcpListener::bind(&addr).await?;
-
-    let client_count = i32::from_str(args.get(1).unwrap_or(&String::from("1")).as_str())?;
 
     let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
 
@@ -24,12 +27,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for i in 0..client_count {
         let (socket, addr) = listener.accept().await.unwrap();
 
-        let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone()).await;
+        let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone(), window_size).await;
 
         pos_rxs.push(pos_rx);
     }
 
-    gyrogun_server::display::launch(pos_rxs);
+    gyrogun_server::display::launch(pos_rxs, window_size);
 
     // Somehow move this to game logic using game::Message
     let mut disconnect_count = 0;

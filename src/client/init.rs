@@ -7,18 +7,24 @@ pub enum InitPhase {
 }
 
 pub struct InitData {
+    window_size: (f32, f32),
     monitor: SensorData,
     first_point: SensorData,
     second_point: SensorData,
 }
 
 impl InitData {
-    pub fn new() -> InitData {
+    pub fn new(window_size: (f32, f32)) -> InitData {
         InitData {
+            window_size,
             monitor: (0.0, 0.0, 0.0),
             first_point: (0.0, 0.0, 0.0),
             second_point: (0.0, 0.0, 0.0),
         }
+    }
+
+    pub fn window_size(&self) -> (f32, f32) {
+        self.window_size
     }
 
     pub fn monitor(&self) -> SensorData {

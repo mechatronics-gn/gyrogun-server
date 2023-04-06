@@ -22,6 +22,7 @@ pub enum Message {
 pub async fn handle(
     mut socket: TcpStream, addr: SocketAddr, index: u32,
     msg_tx: mpsc::Sender<(u32, Message)>,
+    window_size: (f32, f32),
 ) -> watch::Receiver<PosCoord> {
     println!("Handling connection of client #{index}, {addr}");
 
@@ -30,7 +31,7 @@ pub async fn handle(
     tokio::spawn(async move {
         let mut phase = Some(init::InitPhase::WaitMonitor);
 
-        let mut init_data = init::InitData::new();
+        let mut init_data = init::InitData::new(window_size);
         let mut shooter: ShooterCoord = (0.0, 0.0, 0.0);
 
         loop {
@@ -89,8 +90,8 @@ fn shooter_pos(init_data: &init::InitData) -> ShooterCoord {
     let h_tan = (avg_pitch * PI / 180.0).tan();
     println!("a_tan {a_tan} b_tan {b_tan}");
 
-    let x = (a_tan + b_tan) / (a_tan - b_tan) * (-540.0);
-    let y = a_tan * (x + 540.0);
+    let x = (a_tan + b_tan) / (a_tan - b_tan) * (-init_data.window_size().1 / 2.0);
+    let y = a_tan * (x + init_data.window_size().1 / 2.0);
     let h = (x * x + y * y).sqrt() * h_tan;
 
     return (x, y, h);
