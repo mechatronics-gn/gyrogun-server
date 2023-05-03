@@ -5,6 +5,7 @@ use tokio::sync::{mpsc, watch};
 use crate::client::init::InitPhase;
 use crate::client::raw_message::RawMessage;
 
+pub mod fake;
 mod init;
 mod raw_message;
 

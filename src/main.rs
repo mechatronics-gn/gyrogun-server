@@ -18,21 +18,32 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let listener = TcpListener::bind(&addr).await?;
 
-    let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
 
     let (msg_tx, mut msg_rx) = tokio::sync::mpsc::channel(128);
 
     println!("Server up, waiting for {client_count} clients");
 
-    for i in 0..client_count {
-        let (socket, addr) = listener.accept().await.unwrap();
+    if client_count > 0 {
+        let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
+        for i in 0..client_count {
+            let (socket, addr) = listener.accept().await.unwrap();
 
-        let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone(), window_size).await;
+            let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone(), window_size).await;
 
-        pos_rxs.push(pos_rx);
+            pos_rxs.push(pos_rx);
+        }
+
+        gyrogun_server::display::launch(pos_rxs, window_size, None);
+    } else {
+        let fake_client_count = -client_count;
+
+        let (fake_input_tx, fake_input_rx) = std::sync::mpsc::channel();
+
+        let pos_rxs = client::fake::handle(fake_input_rx, msg_tx, fake_client_count, window_size);
+
+        gyrogun_server::display::launch(pos_rxs, window_size, Some(fake_input_tx));
     }
 
-    gyrogun_server::display::launch(pos_rxs, window_size);
 
     // Somehow move this to game logic using game::Message
     let mut disconnect_count = 0;
