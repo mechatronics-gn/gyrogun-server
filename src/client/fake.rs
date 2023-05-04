@@ -33,8 +33,8 @@ pub fn handle(
             } else if let Ok(input) = input {
                 match input {
                     RawMessage::Hover(pos) => { pos_txs[curr as usize].send(fix_pos(pos, window_size)).ok(); }
-                    RawMessage::LeftClick(pos) => { msg_tx.send((curr, super::Message::Click(fix_pos(pos, window_size)))).await.ok();}
-                    RawMessage::RightClick(pos) => { msg_tx.send((curr, super::Message::DoubleClick(fix_pos(pos, window_size)))).await.ok(); }
+                    RawMessage::LeftClick(pos) => { msg_tx.send((curr, super::Message::Click(pos))).await.ok(); }
+                    RawMessage::RightClick(pos) => { msg_tx.send((curr, super::Message::DoubleClick(pos))).await.ok(); }
                     RawMessage::MiddleClick => {
                         if curr == (count - 1) as u32 {
                             curr = 0;
