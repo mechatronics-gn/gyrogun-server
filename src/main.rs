@@ -1,13 +1,12 @@
 use std::error::Error;
 use std::{env, thread};
 use std::str::FromStr;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
 use gyrogun_server::client;
-use gyrogun_server::game::{BalloonGame, Game};
-use gyrogun_server::game::object::balloon::Balloon;
+use gyrogun_server::game::{Game};
+use gyrogun_server::game::balloon_game::BalloonGame;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -56,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut disconnect_count = 0;
 
 
-    let mut game = BalloonGame::new(window_size, i32::abs(client_count) as u32);
+    let mut game = BalloonGame::new(window_size, client_count.abs() as u32);
     let mut time = 0;
 
     loop {
@@ -90,9 +89,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         time += 1;
         thread::sleep(Duration::from_millis(10));
     }
-    
-
-    Ok(())
 }
 
 

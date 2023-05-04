@@ -1,6 +1,5 @@
 use std::ops::Add;
 use macroquad::prelude::*;
-use tokio::sync::mpsc::{Receiver, Sender};
 use crate::game::object::{Coord, Object};
 
 pub struct Scoreboard {
@@ -36,7 +35,7 @@ impl ScoreboardObject {
 }
 
 impl Object for ScoreboardObject {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32)) {
+    fn draw(&self, _center: Coord, age: u32, window_size: (f32, f32)) {
         let mut s = String::new();
         for (i, val) in self.scores.iter().enumerate() {
             s = s.add(format!("{}: {} points\n", i, val).as_str());
@@ -45,7 +44,7 @@ impl Object for ScoreboardObject {
         draw_text(s.as_str(), x, y, 30.0, BLACK);
     }
 
-    fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
+    fn pos(&self, _age: u32, _window_size: (f32, f32)) -> Coord {
         (100.0, 100.0)
     }
 
@@ -57,14 +56,14 @@ impl Object for ScoreboardObject {
         0
     }
 
-    fn shoot_check(&self, coord: Coord, time: u32, window_size: (f32, f32)) -> Option<Coord> {
+    fn shoot_check(&self, _coord: Coord, _time: u32, _window_size: (f32, f32)) -> Option<Coord> {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard) {
+    fn shoot(&mut self, _coord: Coord, _time: u32, _client: u32, _scoreboard: &mut Scoreboard) {
     }
 
-    fn can_be_cleaned(&self, time: u32) -> bool {
+    fn can_be_cleaned(&self, _time: u32) -> bool {
         false
     }
 }

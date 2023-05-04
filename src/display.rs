@@ -3,10 +3,10 @@ use macroquad::prelude::*;
 use macroquad::Window;
 use mpsc::Sender;
 use tokio::sync::watch;
-use std::sync::{Arc, mpsc, Weak};
+use std::sync::mpsc;
 use crate::client::PosCoord;
 use crate::client::fake;
-use crate::game::object::{Object, ObjectWrapper};
+use crate::game::object::ObjectWrapper;
 
 pub fn launch(
     pos_rxs: Vec<watch::Receiver<PosCoord>>,

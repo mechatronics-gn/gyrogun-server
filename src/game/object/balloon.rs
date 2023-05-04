@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use crate::game::object::{Coord};
 use macroquad::prelude::*;
 use crate::game::object::scoreboard::Scoreboard;
@@ -29,7 +28,7 @@ impl Balloon {
 }
 
 impl Object for Balloon {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32)) {
+    fn draw(&self, center: Coord, age: u32, _window_size: (f32, f32)) {
         if let Some((shot_time, (x, y))) = self.shot_data {
             let shot_age = shot_time - self.born_time;
             if shot_age + 100 > age {
