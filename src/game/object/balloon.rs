@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use crate::game::object::{Coord};
 use macroquad::prelude::*;
+use crate::game::object::scoreboard::Scoreboard;
 use super::Object;
 
 pub struct Balloon {
@@ -8,17 +9,19 @@ pub struct Balloon {
     radius: f32,
     color: Color,
     lifetime: u32,
+    shoot_points: i32,
     born_time: u32,
     shot_data: Option<(u32, Coord)>,
 }
 
 impl Balloon {
-    pub fn from(start_x: f32, radius: f32, born_time: u32, color: Color, lifetime: u32) -> Self {
+    pub fn from(start_x: f32, radius: f32, born_time: u32, color: Color, lifetime: u32, shoot_points: i32) -> Self {
         Self {
             start_x,
             radius,
             color,
             lifetime,
+            shoot_points,
             born_time,
             shot_data: None,
         }
@@ -61,9 +64,10 @@ impl Object for Balloon {
         }
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32) {
+    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard) {
         if let None = self.shot_data {
             self.shot_data = Some((time, coord));
+            scoreboard.update(client, self.shoot_points);
         }
     }
 

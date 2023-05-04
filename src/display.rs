@@ -6,13 +6,13 @@ use tokio::sync::watch;
 use std::sync::{Arc, mpsc, Weak};
 use crate::client::PosCoord;
 use crate::client::fake;
-use crate::game::object::Object;
+use crate::game::object::{Object, ObjectWrapper};
 
 pub fn launch(
     pos_rxs: Vec<watch::Receiver<PosCoord>>,
     window_size: (f32, f32),
     fake_input_tx: Option<Sender<fake::RawMessage>>,
-    objects_rx: watch::Receiver<Vec<Weak<Box<dyn Object + Send + Sync>>>>,
+    objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
     time_rx: watch::Receiver<u32>,
 ) {
     thread::spawn(move || {
@@ -37,7 +37,7 @@ async fn draw(
     mut pos_rxs: Vec<watch::Receiver<PosCoord>>,
     window_size: (f32, f32),
     fake_input_tx: Option<Sender<fake::RawMessage>>,
-    objects_rx: watch::Receiver<Vec<Weak<Box<dyn Object + Send + Sync>>>>,
+    objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
     time_rx: watch::Receiver<u32>,
 ) {
     let (width, height) = window_size;
@@ -62,8 +62,15 @@ async fn draw(
         let objects = objects_rx.borrow().to_owned();
 
         for i in &objects {
-            if let Some(i) = i.upgrade() {
-                i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+            match i {
+                ObjectWrapper::Weak(i) => {
+                    if let Some(i) = i.upgrade() {
+                        i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                    }
+                }
+                ObjectWrapper::Arc(i) => {
+                    i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                }
             }
         }
 
