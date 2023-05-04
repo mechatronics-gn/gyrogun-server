@@ -34,8 +34,25 @@ impl BalloonGame {
 impl Game for BalloonGame {
     fn on_time(&mut self, time: u32) {
         if time % 100 == 0 {
-            let balloon = Balloon::from(rand::random::<f32>() * self.window_size.0, 80.0, time);
+            let balloon = Balloon::from(
+                rand::random::<f32>() * self.window_size.0,
+                80.0,
+                time,
+                macroquad::color::PINK,
+            360
+            );
             let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
+            self.add_objects(balloon.clone());
+        }
+        if time % 200 == 50 {
+            let balloon = Balloon::from(
+                rand::random::<f32>() * self.window_size.0,
+                80.0,
+                time,
+                macroquad::color::ORANGE,
+                240
+            );
+            let balloon: Arc<Box<dyn Object + Send+ Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());
         }
     }
@@ -46,11 +63,11 @@ impl Game for BalloonGame {
                 let mut shooteds = vec![];
                 let mut i = 0;
                 while i < self.objects.len() {
-                    if self.objects[i].shoot_check(pos, time, self.window_size) {
+                    if let Some(object_pos) = self.objects[i].shoot_check(pos, time, self.window_size) {
                         let x = self.objects.remove(i);
                         let x = Arc::try_unwrap(x);
                         if let Ok(mut x) = x {
-                            x.shoot(time);
+                            x.shoot(object_pos, time);
                             shooteds.push(Arc::new(x));
                         }
                     } else {
