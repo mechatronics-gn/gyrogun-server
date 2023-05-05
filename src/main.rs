@@ -1,12 +1,14 @@
 use std::error::Error;
 use std::{env, thread};
 use std::str::FromStr;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
 use gyrogun_server::client;
 use gyrogun_server::game::{Game};
 use gyrogun_server::game::balloon_game::BalloonGame;
+use gyrogun_server::texture::TextureStore;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -20,7 +22,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let window_size = (width, height);
 
     let listener = TcpListener::bind(&addr).await?;
-
 
     let (msg_tx, mut msg_rx) = tokio::sync::mpsc::channel(128);
 
@@ -49,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let pos_rxs = client::fake::handle(fake_input_rx, msg_tx, fake_client_count, window_size);
 
-        gyrogun_server::display::launch(pos_rxs, window_size, Some(fake_input_tx), objects_rx, time_rx, bg_color_rx, sounds_rx);
+        gyrogun_server::display::launch(pos_rxs, window_size,Some(fake_input_tx), objects_rx, time_rx, bg_color_rx, sounds_rx);
     }
 
 
@@ -80,13 +81,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 game.on_message(client, msg, time, &mut sounds_tx);
             }
         }
+        time_tx.send(time).ok();
 
         bg_color_tx.send(game.background_color(time)).ok();
 
         if game.was_objects_updated() {
             objects_tx.send(game.objects()).ok();
         }
-        time_tx.send(time).ok();
 
         time += 1;
         thread::sleep(Duration::from_millis(10));

@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::sync::{Arc, mpsc, Weak};
 use crate::game::object::scoreboard::Scoreboard;
 use crate::sound::SoundType;
+use crate::texture::TextureStore;
 
 pub mod balloon;
 pub mod scoreboard;
@@ -10,7 +11,7 @@ pub mod cloud;
 type Coord = (f32, f32);
 
 pub trait Object {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32));
+    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>);
     fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord;
     fn depth(&self) -> Depth;
     fn max_age(&self) -> Option<u32>;

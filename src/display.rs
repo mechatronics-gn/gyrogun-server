@@ -3,12 +3,13 @@ use macroquad::prelude::*;
 use macroquad::Window;
 use mpsc::Sender;
 use tokio::sync::watch;
-use std::sync::mpsc;
+use std::sync::{Arc, mpsc};
 use macroquad::audio::{load_sound_from_bytes, play_sound_once};
 use crate::client::PosCoord;
 use crate::client::fake;
 use crate::game::object::{Depth, ObjectWrapper};
-use crate::sound::SoundType;
+use crate::sound::{SoundStore, SoundType};
+use crate::texture::TextureStore;
 
 pub fn launch(
     pos_rxs: Vec<watch::Receiver<PosCoord>>,
@@ -47,6 +48,10 @@ async fn draw(
     sounds_rx: mpsc::Receiver<SoundType>,
 ) {
     let (width, height) = window_size;
+
+    let texture_store = Arc::new(TextureStore::new());
+    let sound_store = SoundStore::new().await;
+
     loop {
         clear_background(bg_color_rx.borrow().to_owned());
 
@@ -64,6 +69,11 @@ async fn draw(
             }
         }
 
+        while let Some(x) = sounds_rx.try_iter().next() {
+            if let Some(sound) = sound_store.get(&x) {
+                play_sound_once(sound);
+            }
+        }
 
         let time = *time_rx.borrow_and_update();
         let mut objects = objects_rx.borrow().to_owned();
@@ -91,13 +101,13 @@ async fn draw(
                      */
                     if let Some(i) = i.upgrade() {
                         if time > i.born_time() {
-                            i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                            i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size, texture_store.clone());
                         }
                     }
                 }
                 ObjectWrapper::Arc(i) => {
                     if time > i.born_time() {
-                        i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                        i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size, texture_store.clone());
                     }
                 }
             }
@@ -108,12 +118,7 @@ async fn draw(
         let mut i = 0;
         for pos_rx in &mut pos_rxs {
             let (x, y) = *pos_rx.borrow_and_update();
-            let crosshair;
-            if i % 2 == 0 {
-                crosshair = Texture2D::from_file_with_format(include_bytes!("../res/crosshair_red_small.png"), Some(ImageFormat::Png));
-            } else {
-                crosshair = Texture2D::from_file_with_format(include_bytes!("../res/crosshair_green_small.png"), Some(ImageFormat::Png));
-            }
+            let crosshair = texture_store.crosshair(i % 2);
             draw_texture_ex(crosshair, width / 2.0 + x - width / 48.0, height / 2.0 - y - height / 27.0, WHITE, DrawTextureParams {
                 dest_size: Some(Vec2 { x: width / 24.0, y: height / 13.5 }),
                 source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
@@ -122,22 +127,6 @@ async fn draw(
         }
 
         draw_text(format!("FPS: {:03}", get_fps()).as_str(), 50.0, 50.0, 80.0, if get_fps() < 60 { RED } else { BLACK });
-
-        /* Sounds can arrive at any time */
-        while !time_rx.has_changed().unwrap_or(false) {
-            while let Some(x) = sounds_rx.try_iter().next() {
-                let sound;
-                match x {
-                    SoundType::BalloonExplosion => {
-                        sound = load_sound_from_bytes(include_bytes!("../res/mixkit-ballon-blows-up-3071.wav")).await.ok();
-                    }
-                }
-
-                if let Some(sound) = sound {
-                    play_sound_once(sound);
-                }
-            }
-        }
 
         next_frame().await;
     }

@@ -1,22 +1,27 @@
-use std::sync::mpsc;
+use std::sync::{Arc, mpsc};
 use crate::game::object::{Coord, Depth};
 use macroquad::prelude::*;
 use crate::game::object::scoreboard::Scoreboard;
 use crate::sound::SoundType;
+use crate::texture::TextureStore;
 use super::Object;
 
 pub struct Balloon {
     start_x: f32,
     radius: f32,
-    color: Color,
+    color: BalloonColor,
     lifetime: u32,
     shoot_points: i32,
     born_time: u32,
     shot_data: Option<(u32, Coord)>,
 }
 
+pub enum BalloonColor {
+    Blue, Green, Orange, Pink, Purple, Red, Yellow
+}
+
 impl Balloon {
-    pub fn new(start_x: f32, radius: f32, born_time: u32, color: Color, lifetime: u32, shoot_points: i32) -> Self {
+    pub fn new(start_x: f32, radius: f32, born_time: u32, color: BalloonColor, lifetime: u32, shoot_points: i32) -> Self {
         Self {
             start_x,
             radius,
@@ -30,16 +35,28 @@ impl Balloon {
 }
 
 impl Object for Balloon {
-    fn draw(&self, center: Coord, age: u32, _window_size: (f32, f32)) {
+    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         if let Some((shot_time, (x, y))) = self.shot_data {
             let shot_age = shot_time - self.born_time;
-            if shot_age + 100 > age {
-                draw_circle(x, y, self.radius * (shot_age + 100 - age) as f32 / 100.0 as f32, self.color);
+            if shot_age + 50 > age && age > shot_age {
+                let variant = (age - shot_age) / 10 + 2;
+                let texture = texture_store.balloon(&self.color, variant as i32);
+                draw_texture_ex(texture, x - window_size.0 * 0.108 / 2.0, y - window_size.1 * 0.086 , WHITE, DrawTextureParams {
+                    dest_size: Some(Vec2 { x: window_size.0 * 0.108, y: window_size.1 * 0.193 }),
+                    source: None, rotation: 0.0, flip_x: false, flip_y: false,
+                    pivot: None,
+                })
             }
             return;
         }
         let (x, y) = center;
-        draw_circle(x, y, self.radius, self.color);
+        draw_circle(x, y, self.radius, RED);
+        let texture = texture_store.balloon(&self.color, 1);
+        draw_texture_ex(texture, x - window_size.0 * 0.108 / 2.0, y - window_size.1 * 0.086 , WHITE, DrawTextureParams {
+            dest_size: Some(Vec2 { x: window_size.0 * 0.108, y: window_size.1 * 0.193 }),
+            source: None, rotation: 0.0, flip_x: false, flip_y: false,
+            pivot: None,
+        })
     }
 
     fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
@@ -82,6 +99,8 @@ impl Object for Balloon {
             if time > shot_time + 100 {
                 return true;
             }
+        } else if self.born_time + self.lifetime < time {
+            return true;
         }
         false
     }

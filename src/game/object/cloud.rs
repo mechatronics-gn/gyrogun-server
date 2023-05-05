@@ -1,8 +1,9 @@
-use std::sync::mpsc;
+use std::sync::{Arc, mpsc};
 use macroquad::prelude::*;
 use crate::game::object::{Coord, Depth, Object};
 use crate::game::object::scoreboard::Scoreboard;
 use crate::sound::SoundType;
+use crate::texture::TextureStore;
 
 pub struct Cloud {
     y: f32,
@@ -24,7 +25,7 @@ impl Cloud {
 }
 
 impl Object for Cloud {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32)) {
+    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         let (x, y) = center;
         draw_rectangle(x-self.width()/2.0, y-self.height/2.0, self.width(), self.height, WHITE);
     }

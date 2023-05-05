@@ -1,8 +1,9 @@
 use std::ops::Add;
-use std::sync::mpsc;
+use std::sync::{Arc, mpsc};
 use macroquad::prelude::*;
 use crate::game::object::{Coord, Depth, Object};
 use crate::sound::SoundType;
+use crate::texture::TextureStore;
 
 pub struct Scoreboard {
     scores: Vec<i32>
@@ -37,7 +38,7 @@ impl ScoreboardObject {
 }
 
 impl Object for ScoreboardObject {
-    fn draw(&self, _center: Coord, age: u32, window_size: (f32, f32)) {
+    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         let mut s = String::new();
         for (i, val) in self.scores.iter().enumerate() {
             s = s.add(format!("{}: {} points\n", i, val).as_str());
