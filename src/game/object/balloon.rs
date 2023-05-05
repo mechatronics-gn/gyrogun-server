@@ -82,7 +82,7 @@ impl Object for Balloon {
     }
 
     fn depth(&self) -> Depth {
-        Depth::Main(self.shoot_points)
+        Depth::Main(self.radius as i32)
     }
 
     fn max_age(&self) -> Option<u32> {
@@ -117,7 +117,7 @@ impl Object for Balloon {
             if time > shot_time + 100 {
                 return true;
             }
-        } else if self.born_time + self.lifetime < time {
+        } else if self.born_time + self.lifetime + 150 < time {
             return true;
         }
         false
