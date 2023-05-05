@@ -79,12 +79,22 @@ async fn draw(
         for i in &objects {
             match i {
                 ObjectWrapper::Weak(i) => {
+                    /*
+                    This might actually cause instant disappearance if Arc is gone, but it won't
+                    normally happen unless tick can't end before rendering,
+                    which requires a lot of load.
+                    Having about 15k objects at once cause instant disappearance for 40% chance.
+                     */
                     if let Some(i) = i.upgrade() {
-                        i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                        if time > i.born_time() {
+                            i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                        }
                     }
                 }
                 ObjectWrapper::Arc(i) => {
-                    i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                    if time > i.born_time() {
+                        i.draw(i.pos(time - i.born_time(), window_size), time - i.born_time(), window_size);
+                    }
                 }
             }
         }
