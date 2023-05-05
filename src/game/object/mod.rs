@@ -3,6 +3,7 @@ use crate::game::object::scoreboard::Scoreboard;
 
 pub mod balloon;
 pub mod scoreboard;
+pub mod cloud;
 
 type Coord = (f32, f32);
 

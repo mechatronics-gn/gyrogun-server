@@ -3,6 +3,7 @@ use crate::client::Message;
 use crate::game::Game;
 use crate::game::object::balloon::Balloon;
 use crate::game::object::{Object, ObjectWrapper};
+use crate::game::object::cloud::Cloud;
 use crate::game::object::scoreboard::{Scoreboard, ScoreboardObject};
 
 pub struct BalloonGame {
@@ -48,6 +49,16 @@ impl Game for BalloonGame {
             );
             let balloon: Arc<Box<dyn Object + Send+ Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());
+        }
+        if time % 400 == 70 {
+            let cloud = Cloud::new(
+                rand::random::<f32>() * self.window_size.1,
+                rand::random::<f32>() * 160.0 + 120.0,
+                rand::random::<u32>() % 600 + 1200,
+                time,
+            );
+            let cloud: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(cloud));
+            self.add_objects(cloud.clone());
         }
     }
 
