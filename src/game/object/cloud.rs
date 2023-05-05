@@ -32,7 +32,7 @@ impl Object for Cloud {
     }
 
     fn depth(&self) -> Depth {
-        Depth::Background
+        Depth::Background(self.lifetime as i32 * -1)
     }
 
     fn max_age(&self) -> Option<u32> {

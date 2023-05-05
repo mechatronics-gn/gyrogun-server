@@ -42,7 +42,7 @@ async fn draw(
 ) {
     let (width, height) = window_size;
     loop {
-        clear_background(Color::from_rgba(178, 255, 255, 0));
+        clear_background(Color::from_rgba(147, 169, 209, 0));
 
         if let Some(x) = &fake_input_tx {
             let mouse_pos = mouse_position();
@@ -65,7 +65,7 @@ async fn draw(
                 if let Some(i) = i.upgrade() {
                     i.depth()
                 } else {
-                    Depth::Main
+                    Depth::Main(0)
                 }
             }
             ObjectWrapper::Arc(i) => {

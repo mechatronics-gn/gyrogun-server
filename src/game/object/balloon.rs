@@ -45,7 +45,7 @@ impl Object for Balloon {
     }
 
     fn depth(&self) -> Depth {
-        Depth::Main
+        Depth::Main(self.shoot_points)
     }
 
     fn max_age(&self) -> Option<u32> {

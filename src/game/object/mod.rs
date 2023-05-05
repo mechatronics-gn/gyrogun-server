@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::sync::{Arc, Weak};
 use crate::game::object::scoreboard::Scoreboard;
 
@@ -24,9 +25,43 @@ pub enum ObjectWrapper {
     Arc(Arc<Box<dyn Object + Send + Sync>>),
 }
 
-#[derive(PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Eq, PartialEq)]
 pub enum Depth {
-    Background,
-    Main,
-    Foreground,
+    Background(i32),
+    Main(i32),
+    Foreground(i32),
+}
+
+impl PartialOrd for Depth {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self {
+            Depth::Background(i) => {
+                if let Depth::Background(j) = other {
+                    Some(i.cmp(j))
+                } else {
+                    Some(Ordering::Less)
+                }
+            }
+            Depth::Main(i) => {
+                match other {
+                    Depth::Background(_) => { Some(Ordering::Greater) }
+                    Depth::Main(j) => { Some(i.cmp(j)) }
+                    Depth::Foreground(_) => { Some(Ordering::Less) }
+                }
+            }
+            Depth::Foreground(i) => {
+                if let Depth::Foreground(j) = other {
+                    Some(i.cmp(j))
+                } else {
+                    Some(Ordering::Greater)
+                }
+            }
+        }
+    }
+}
+
+impl Ord for Depth {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+    }
 }

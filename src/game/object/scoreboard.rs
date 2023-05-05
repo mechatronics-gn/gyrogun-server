@@ -48,7 +48,7 @@ impl Object for ScoreboardObject {
         (100.0, 100.0)
     }
 
-    fn depth(&self) -> Depth { Depth::Foreground }
+    fn depth(&self) -> Depth { Depth::Foreground(0) }
 
     fn max_age(&self) -> Option<u32> {
         None
