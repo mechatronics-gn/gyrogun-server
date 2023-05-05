@@ -67,8 +67,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Err(_) = try_recv {
                 break;
             } else if let Ok((client, msg)) = try_recv {
-                println!("Client #{client}: {:?}", msg);
-
                 if let client::Message::Disconnect = msg {
                     disconnect_count += 1;
 
