@@ -46,6 +46,20 @@ impl Object for Balloon {
                     source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
                 });
             }
+
+            let (r, g, b) = if self.shoot_points > 0 { (0, 255, 0) } else { (255, 0, 0) };
+            let text = if self.shoot_points > 0 { format!("+{}", self.shoot_points) } else { format!("{}", self.shoot_points) };
+            let alpha = if age < shot_age + 33 {
+                ((age - shot_age) * 255 / 34) as u8
+            } else if age < shot_age + 66 {
+                255
+            } else if age < shot_age + 100 {
+                255 - ((age - shot_age - 66) * 255 / 35) as u8
+            } else {
+                0
+            };
+            draw_text(text.as_str(), x, y, window_size.0 / 24.0, Color::from_rgba(r, g, b, alpha));
+
             return;
         }
         let (x, y) = center;

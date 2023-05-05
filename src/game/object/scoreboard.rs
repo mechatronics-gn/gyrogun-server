@@ -18,6 +18,9 @@ impl Scoreboard {
 
     pub fn update(&mut self, client: u32, diff: i32) {
         self.scores[client as usize] += diff;
+        if self.scores[client as usize] < 0 {
+            self.scores[client as usize] = 0;
+        }
     }
 
     fn scores(&self) -> Vec<i32> {

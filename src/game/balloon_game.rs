@@ -65,10 +65,22 @@ impl Game for BalloonGame {
             let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());
         }
+        if time % 150 == 20 {
+            let balloon = Balloon::new(
+                rand::random::<f32>() * self.window_size.0,
+                self.window_size.0/24.0,
+                time,
+                BalloonColor::Purple,
+                300,
+                -((rand::random::<u32>() % 3) as i32 + 1)
+            );
+            let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
+            self.add_objects(balloon.clone());
+        }
         if time % 400 == 70 {
             let cloud = Cloud::new(
                 rand::random::<f32>() * self.window_size.1,
-                rand::random::<f32>() * 160.0 + 120.0,
+                rand::random::<f32>() * 320.0 + 240.0,
                 rand::random::<u32>() % 600 + 1200,
                 time,
             );
