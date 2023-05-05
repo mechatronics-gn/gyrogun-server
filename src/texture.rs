@@ -57,6 +57,9 @@ impl TextureStore {
         map.insert("balloon-yellow-5".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/balloons/yellow-balloon/5.png"), Some(ImageFormat::Png)));
         map.insert("balloon-yellow-6".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/balloons/yellow-balloon/6.png"), Some(ImageFormat::Png)));
 
+        map.insert("balloon-string-1".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/balloons/string-1.png"), Some(ImageFormat::Png)));
+        map.insert("balloon-string-2".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/balloons/string-2.png"), Some(ImageFormat::Png)));
+
         TextureStore {
             store: map
         }
@@ -77,5 +80,9 @@ impl TextureStore {
             BalloonColor::Yellow => { "yellow" }
         };
         self.store.get(format!("balloon-{}-{}", color, variant).as_str()).map_or(Texture2D::empty(), |x| *x)
+    }
+
+    pub fn balloon_string(&self, variant: i32) -> Texture2D {
+        self.store.get(format!("balloon-string-{}", variant).as_str()).map_or(Texture2D::empty(), |x| *x)
     }
 }

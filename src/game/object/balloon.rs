@@ -43,9 +43,8 @@ impl Object for Balloon {
                 let texture = texture_store.balloon(&self.color, variant as i32);
                 draw_texture_ex(texture, x - window_size.0 * 0.108 / 2.0, y - window_size.1 * 0.086 , WHITE, DrawTextureParams {
                     dest_size: Some(Vec2 { x: window_size.0 * 0.108, y: window_size.1 * 0.193 }),
-                    source: None, rotation: 0.0, flip_x: false, flip_y: false,
-                    pivot: None,
-                })
+                    source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
+                });
             }
             return;
         }
@@ -54,13 +53,18 @@ impl Object for Balloon {
         let texture = texture_store.balloon(&self.color, 1);
         draw_texture_ex(texture, x - window_size.0 * 0.108 / 2.0, y - window_size.1 * 0.086 , WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: window_size.0 * 0.108, y: window_size.1 * 0.193 }),
-            source: None, rotation: 0.0, flip_x: false, flip_y: false,
-            pivot: None,
-        })
+            source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
+        });
+
+        let string = texture_store.balloon_string(2);
+        draw_texture_ex(string, x - window_size.0 * 0.003 / 2.0, y + window_size.1 * 0.088, WHITE, DrawTextureParams {
+            dest_size: Some(Vec2 { x: window_size.0 * 0.003, y: window_size.1 * 0.083}),
+            source: None, rotation: 0.0, flip_x: false, flip_y: false,  pivot: None,
+        } )
     }
 
     fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
-        (self.start_x, window_size.1 - (age * 1080 / (self.lifetime-60)) as f32 + self.radius / 2.0)
+        (self.start_x, window_size.1 - (age * 1080 / (self.lifetime-60)) as f32 + self.radius)
     }
 
     fn depth(&self) -> Depth {

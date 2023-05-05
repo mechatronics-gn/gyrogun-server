@@ -29,7 +29,7 @@ impl BalloonGame {
 
 impl Game for BalloonGame {
     fn on_time(&mut self, time: u32) {
-        if time % 100 == 0 {
+        if time % if time > 6000 { 200 } else { 100 } == 0 {
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
                 self.window_size.0 / 24.0,
@@ -41,7 +41,7 @@ impl Game for BalloonGame {
             let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());
         }
-        if time % 200 == 50 {
+        if time % if time > 6000 { 100 } else { 200 } == 50 {
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
                 self.window_size.0 / 24.0,
@@ -51,6 +51,18 @@ impl Game for BalloonGame {
                 2
             );
             let balloon: Arc<Box<dyn Object + Send+ Sync>> = Arc::new(Box::new(balloon));
+            self.add_objects(balloon.clone());
+        }
+        if rand::random::<i32>() % 3000 == 0 {
+            let balloon = Balloon::new(
+                rand::random::<f32>() * self.window_size.0,
+                self.window_size.0 / 24.0,
+                time,
+                BalloonColor::Green,
+                160,
+                5
+            );
+            let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());
         }
         if time % 400 == 70 {
@@ -63,6 +75,7 @@ impl Game for BalloonGame {
             let cloud: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(cloud));
             self.add_objects(cloud.clone());
         }
+
 
         let mut i = 0;
         while i < self.objects.len() {
