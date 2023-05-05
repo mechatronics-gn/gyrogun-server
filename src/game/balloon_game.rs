@@ -26,7 +26,7 @@ impl BalloonGame {
 impl Game for BalloonGame {
     fn on_time(&mut self, time: u32) {
         if time % 100 == 0 {
-            let balloon = Balloon::from(
+            let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
                 80.0,
                 time,
@@ -38,7 +38,7 @@ impl Game for BalloonGame {
             self.add_objects(balloon.clone());
         }
         if time % 200 == 50 {
-            let balloon = Balloon::from(
+            let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
                 80.0,
                 time,

@@ -14,7 +14,7 @@ pub struct Balloon {
 }
 
 impl Balloon {
-    pub fn from(start_x: f32, radius: f32, born_time: u32, color: Color, lifetime: u32, shoot_points: i32) -> Self {
+    pub fn new(start_x: f32, radius: f32, born_time: u32, color: Color, lifetime: u32, shoot_points: i32) -> Self {
         Self {
             start_x,
             radius,
