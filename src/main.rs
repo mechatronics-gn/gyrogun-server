@@ -29,6 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (objects_tx, objects_rx) = tokio::sync::watch::channel(vec![]);
     let (time_tx, time_rx) = tokio::sync::watch::channel(0);
     let (bg_color_tx, bg_color_rx) = tokio::sync::watch::channel(macroquad::color::WHITE);
+    let (mut sounds_tx, sounds_rx) = std::sync::mpsc::channel();
 
     if client_count > 0 {
         let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
@@ -40,7 +41,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             pos_rxs.push(pos_rx);
         }
 
-        gyrogun_server::display::launch(pos_rxs, window_size, None, objects_rx, time_rx, bg_color_rx);
+        gyrogun_server::display::launch(pos_rxs, window_size, None, objects_rx, time_rx, bg_color_rx, sounds_rx);
     } else {
         let fake_client_count = -client_count;
 
@@ -48,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let pos_rxs = client::fake::handle(fake_input_rx, msg_tx, fake_client_count, window_size);
 
-        gyrogun_server::display::launch(pos_rxs, window_size, Some(fake_input_tx), objects_rx, time_rx, bg_color_rx);
+        gyrogun_server::display::launch(pos_rxs, window_size, Some(fake_input_tx), objects_rx, time_rx, bg_color_rx, sounds_rx);
     }
 
 
@@ -76,7 +77,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                game.on_message(client, msg, time);
+                game.on_message(client, msg, time, &mut sounds_tx);
             }
         }
 

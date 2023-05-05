@@ -1,6 +1,8 @@
 use std::ops::Add;
+use std::sync::mpsc;
 use macroquad::prelude::*;
 use crate::game::object::{Coord, Depth, Object};
+use crate::sound::SoundType;
 
 pub struct Scoreboard {
     scores: Vec<i32>
@@ -62,7 +64,7 @@ impl Object for ScoreboardObject {
         None
     }
 
-    fn shoot(&mut self, _coord: Coord, _time: u32, _client: u32, _scoreboard: &mut Scoreboard) {
+    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {
     }
 
     fn can_be_cleaned(&self, _time: u32) -> bool {

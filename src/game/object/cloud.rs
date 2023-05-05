@@ -1,6 +1,8 @@
+use std::sync::mpsc;
 use macroquad::prelude::*;
 use crate::game::object::{Coord, Depth, Object};
 use crate::game::object::scoreboard::Scoreboard;
+use crate::sound::SoundType;
 
 pub struct Cloud {
     y: f32,
@@ -47,7 +49,7 @@ impl Object for Cloud {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard) {
+    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {
     }
 
     fn can_be_cleaned(&self, time: u32) -> bool {

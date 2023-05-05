@@ -1,6 +1,8 @@
+use std::sync::mpsc;
 use crate::game::object::{Coord, Depth};
 use macroquad::prelude::*;
 use crate::game::object::scoreboard::Scoreboard;
+use crate::sound::SoundType;
 use super::Object;
 
 pub struct Balloon {
@@ -67,10 +69,11 @@ impl Object for Balloon {
         }
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard) {
+    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {
         if let None = self.shot_data {
             self.shot_data = Some((time, coord));
             scoreboard.update(client, self.shoot_points);
+            sound_tx.send(SoundType::BalloonExplosion).ok();
         }
     }
 

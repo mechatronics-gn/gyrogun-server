@@ -4,9 +4,11 @@ use macroquad::Window;
 use mpsc::Sender;
 use tokio::sync::watch;
 use std::sync::mpsc;
+use macroquad::audio::{load_sound_from_bytes, play_sound_once};
 use crate::client::PosCoord;
 use crate::client::fake;
 use crate::game::object::{Depth, ObjectWrapper};
+use crate::sound::SoundType;
 
 pub fn launch(
     pos_rxs: Vec<watch::Receiver<PosCoord>>,
@@ -15,6 +17,7 @@ pub fn launch(
     objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
     time_rx: watch::Receiver<u32>,
     bg_color_rx: watch::Receiver<Color>,
+    sounds_rx: mpsc::Receiver<SoundType>,
 ) {
     thread::spawn(move || {
         Window::from_config(
@@ -29,7 +32,7 @@ pub fn launch(
                 icon: None,
                 platform: Default::default(),
             },
-            draw(pos_rxs, window_size, fake_input_tx, objects_rx, time_rx, bg_color_rx)
+            draw(pos_rxs, window_size, fake_input_tx, objects_rx, time_rx, bg_color_rx, sounds_rx)
         );
     });
 }
@@ -40,7 +43,8 @@ async fn draw(
     fake_input_tx: Option<Sender<fake::RawMessage>>,
     objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
     mut time_rx: watch::Receiver<u32>,
-    bg_color_rx: watch::Receiver<Color>
+    bg_color_rx: watch::Receiver<Color>,
+    sounds_rx: mpsc::Receiver<SoundType>,
 ) {
     let (width, height) = window_size;
     loop {
@@ -117,11 +121,22 @@ async fn draw(
             i += 1;
         }
 
-
         draw_text(format!("FPS: {:03}", get_fps()).as_str(), 50.0, 50.0, 80.0, if get_fps() < 60 { RED } else { BLACK });
 
+        /* Sounds can arrive at any time */
         while !time_rx.has_changed().unwrap_or(false) {
+            while let Some(x) = sounds_rx.try_iter().next() {
+                let sound;
+                match x {
+                    SoundType::BalloonExplosion => {
+                        sound = load_sound_from_bytes(include_bytes!("../res/mixkit-ballon-blows-up-3071.wav")).await.ok();
+                    }
+                }
 
+                if let Some(sound) = sound {
+                    play_sound_once(sound);
+                }
+            }
         }
 
         next_frame().await;

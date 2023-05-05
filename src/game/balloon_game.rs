@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, mpsc};
 use macroquad::color::Color;
 use crate::client::Message;
 use crate::game::Game;
@@ -6,6 +6,7 @@ use crate::game::object::balloon::Balloon;
 use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::cloud::Cloud;
 use crate::game::object::scoreboard::{Scoreboard, ScoreboardObject};
+use crate::sound::SoundType;
 
 pub struct BalloonGame {
     window_size: (f32, f32),
@@ -63,7 +64,7 @@ impl Game for BalloonGame {
         }
     }
 
-    fn on_message(&mut self, client: u32, message: Message, time: u32) {
+    fn on_message(&mut self, client: u32, message: Message, time: u32, sound_tx: &mut mpsc::Sender<SoundType>) {
         match message {
             Message::Click(pos) => {
                 let mut shooteds = vec![];
@@ -79,7 +80,7 @@ impl Game for BalloonGame {
                         let x = self.objects.remove(i);
                         let x = Arc::try_unwrap(x);
                         if let Ok(mut x) = x {
-                            x.shoot(object_pos, time, client, &mut self.scoreboard);
+                            x.shoot(object_pos, time, client, &mut self.scoreboard, sound_tx);
                             // this causes a scoreboard change, resulting in a object update
                             self.objects_was_updated = true;
                             shooteds.push(Arc::new(x));
