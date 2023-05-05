@@ -41,8 +41,8 @@ impl Object for Balloon {
             if shot_age + 50 > age && age > shot_age {
                 let variant = (age - shot_age) / 10 + 2;
                 let texture = texture_store.balloon(&self.color, variant as i32);
-                draw_texture_ex(texture, x - window_size.0 * 0.108 / 2.0, y - window_size.1 * 0.086 , WHITE, DrawTextureParams {
-                    dest_size: Some(Vec2 { x: window_size.0 * 0.108, y: window_size.1 * 0.193 }),
+                draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
+                    dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
                     source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
                 });
             }
@@ -65,14 +65,14 @@ impl Object for Balloon {
         let (x, y) = center;
         draw_circle(x, y, self.radius, RED);
         let texture = texture_store.balloon(&self.color, 1);
-        draw_texture_ex(texture, x - window_size.0 * 0.108 / 2.0, y - window_size.1 * 0.086 , WHITE, DrawTextureParams {
-            dest_size: Some(Vec2 { x: window_size.0 * 0.108, y: window_size.1 * 0.193 }),
+        draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
+            dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
             source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
         });
 
         let string = texture_store.balloon_string(2);
-        draw_texture_ex(string, x - window_size.0 * 0.003 / 2.0, y + window_size.1 * 0.088, WHITE, DrawTextureParams {
-            dest_size: Some(Vec2 { x: window_size.0 * 0.003, y: window_size.1 * 0.083}),
+        draw_texture_ex(string, x - self.radius * 0.08881 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
+            dest_size: Some(Vec2 { x: self.radius * 0.08881, y: self.radius * 2.2076}),
             source: None, rotation: 0.0, flip_x: false, flip_y: false,  pivot: None,
         } )
     }
