@@ -88,9 +88,20 @@ async fn draw(
 
         draw_circle(width / 2.0 - height / 2.0, height / 2.0, 20.0, GREEN);
         draw_circle(width / 2.0 + height / 2.0, height / 2.0, 20.0, GREEN);
+        let mut i = 0;
         for pos_rx in &mut pos_rxs {
             let (x, y) = *pos_rx.borrow_and_update();
-            draw_circle(width / 2.0 + x, height / 2.0 - y, 20.0, RED);
+            let crosshair;
+            if i % 2 == 0 {
+                crosshair = Texture2D::from_file_with_format(include_bytes!("../res/crosshair_red_small.png"), Some(ImageFormat::Png));
+            } else {
+                crosshair = Texture2D::from_file_with_format(include_bytes!("../res/crosshair_green_small.png"), Some(ImageFormat::Png));
+            }
+            draw_texture_ex(crosshair, width / 2.0 + x - width / 48.0, height / 2.0 - y - height / 27.0, WHITE, DrawTextureParams {
+                dest_size: Some(Vec2 { x: width / 24.0, y: height / 13.5 }),
+                source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
+            });
+            i += 1;
         }
         next_frame().await;
     }
