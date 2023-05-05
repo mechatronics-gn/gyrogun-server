@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use macroquad::color::Color;
 use crate::game::object::{Object, ObjectWrapper};
 use crate::client::Message;
 
@@ -12,4 +13,5 @@ pub trait Game {
     fn objects(&mut self) -> Vec<ObjectWrapper>;
     fn add_objects(&mut self, object: Arc<Box<dyn Object + Send + Sync>>);
     fn was_objects_updated(&mut self) -> bool;
+    fn background_color(&self, time: u32) -> Color;
 }

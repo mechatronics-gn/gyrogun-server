@@ -14,6 +14,7 @@ pub fn launch(
     fake_input_tx: Option<Sender<fake::RawMessage>>,
     objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
     time_rx: watch::Receiver<u32>,
+    bg_color_rx: watch::Receiver<Color>,
 ) {
     thread::spawn(move || {
         Window::from_config(
@@ -28,7 +29,7 @@ pub fn launch(
                 icon: None,
                 platform: Default::default(),
             },
-            draw(pos_rxs, window_size, fake_input_tx, objects_rx, time_rx)
+            draw(pos_rxs, window_size, fake_input_tx, objects_rx, time_rx, bg_color_rx)
         );
     });
 }
@@ -38,11 +39,12 @@ async fn draw(
     window_size: (f32, f32),
     fake_input_tx: Option<Sender<fake::RawMessage>>,
     objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
-    time_rx: watch::Receiver<u32>,
+    mut time_rx: watch::Receiver<u32>,
+    bg_color_rx: watch::Receiver<Color>
 ) {
     let (width, height) = window_size;
     loop {
-        clear_background(Color::from_rgba(147, 169, 209, 0));
+        clear_background(bg_color_rx.borrow().to_owned());
 
         if let Some(x) = &fake_input_tx {
             let mouse_pos = mouse_position();
@@ -58,7 +60,8 @@ async fn draw(
             }
         }
 
-        let time = *time_rx.borrow();
+
+        let time = *time_rx.borrow_and_update();
         let mut objects = objects_rx.borrow().to_owned();
         objects.sort_by_key(|k| match k {
             ObjectWrapper::Weak(i) => {
@@ -103,6 +106,14 @@ async fn draw(
             });
             i += 1;
         }
+
+
+        draw_text(format!("FPS: {:03}", get_fps()).as_str(), 50.0, 50.0, 80.0, if get_fps() < 60 { RED } else { BLACK });
+
+        while !time_rx.has_changed().unwrap_or(false) {
+
+        }
+
         next_frame().await;
     }
 }

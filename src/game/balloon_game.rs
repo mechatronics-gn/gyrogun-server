@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use macroquad::color::Color;
 use crate::client::Message;
 use crate::game::Game;
 use crate::game::object::balloon::Balloon;
@@ -115,5 +116,9 @@ impl Game for BalloonGame {
             return true;
         }
         false
+    }
+
+    fn background_color(&self, time: u32) -> Color {
+        Color::from_rgba(147, 169, 209, 0)
     }
 }
