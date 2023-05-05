@@ -1,6 +1,6 @@
 use std::ops::Add;
 use macroquad::prelude::*;
-use crate::game::object::{Coord, Object};
+use crate::game::object::{Coord, Depth, Object};
 
 pub struct Scoreboard {
     scores: Vec<i32>
@@ -47,6 +47,8 @@ impl Object for ScoreboardObject {
     fn pos(&self, _age: u32, _window_size: (f32, f32)) -> Coord {
         (100.0, 100.0)
     }
+
+    fn depth(&self) -> Depth { Depth::Foreground }
 
     fn max_age(&self) -> Option<u32> {
         None

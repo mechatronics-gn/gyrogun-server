@@ -6,7 +6,7 @@ use tokio::sync::watch;
 use std::sync::mpsc;
 use crate::client::PosCoord;
 use crate::client::fake;
-use crate::game::object::ObjectWrapper;
+use crate::game::object::{Depth, ObjectWrapper};
 
 pub fn launch(
     pos_rxs: Vec<watch::Receiver<PosCoord>>,
@@ -42,7 +42,7 @@ async fn draw(
 ) {
     let (width, height) = window_size;
     loop {
-        clear_background(WHITE);
+        clear_background(Color::from_rgba(178, 255, 255, 0));
 
         if let Some(x) = &fake_input_tx {
             let mouse_pos = mouse_position();
@@ -59,7 +59,19 @@ async fn draw(
         }
 
         let time = *time_rx.borrow();
-        let objects = objects_rx.borrow().to_owned();
+        let mut objects = objects_rx.borrow().to_owned();
+        objects.sort_by_key(|k| match k {
+            ObjectWrapper::Weak(i) => {
+                if let Some(i) = i.upgrade() {
+                    i.depth()
+                } else {
+                    Depth::Main
+                }
+            }
+            ObjectWrapper::Arc(i) => {
+                i.depth()
+            }
+        });
 
         for i in &objects {
             match i {

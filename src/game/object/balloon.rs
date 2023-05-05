@@ -1,4 +1,4 @@
-use crate::game::object::{Coord};
+use crate::game::object::{Coord, Depth};
 use macroquad::prelude::*;
 use crate::game::object::scoreboard::Scoreboard;
 use super::Object;
@@ -42,6 +42,10 @@ impl Object for Balloon {
 
     fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
         (self.start_x, window_size.1 - (age * 1080 / (self.lifetime-60)) as f32 + self.radius / 2.0)
+    }
+
+    fn depth(&self) -> Depth {
+        Depth::Main
     }
 
     fn max_age(&self) -> Option<u32> {
