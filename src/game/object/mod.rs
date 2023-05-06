@@ -7,6 +7,7 @@ use crate::texture::TextureStore;
 pub mod balloon;
 pub mod scoreboard;
 pub mod cloud;
+pub mod special_balloon;
 
 type Coord = (f32, f32);
 

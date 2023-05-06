@@ -6,6 +6,7 @@ use crate::game::object::balloon::{Balloon, BalloonColor};
 use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::cloud::Cloud;
 use crate::game::object::scoreboard::{Scoreboard, ScoreboardObject};
+use crate::game::object::special_balloon::{SpecialBalloon, SpecialBalloonEffect};
 use crate::sound::SoundType;
 use crate::wait_unwrap_and_map;
 
@@ -61,6 +62,18 @@ impl Game for BalloonGame {
                 BalloonColor::Green,
                 160,
                 5
+            );
+            let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
+            self.add_objects(balloon.clone());
+        }
+        if rand::random::<i32>() % 1200 == 0 {
+            let balloon = SpecialBalloon::new(
+                rand::random::<f32>() * self.window_size.0,
+                self.window_size.0 / 24.0 * (rand::random::<f32>() * 0.2 + 1.0),
+                time,
+                BalloonColor::Yellow,
+                270,
+                SpecialBalloonEffect::MultiplyScore(2, 1000),
             );
             let balloon: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());

@@ -6,21 +6,35 @@ use crate::sound::SoundType;
 use crate::texture::TextureStore;
 
 pub struct Scoreboard {
-    scores: Vec<i32>
+    scores: Vec<i32>,
+    multiplications: Vec<(i32, u32, u32)>,
 }
 
 impl Scoreboard {
     pub fn new(client_count: u32) -> Self {
         Self {
-           scores: vec![0; client_count as usize]
+            scores: vec![0; client_count as usize],
+            multiplications: vec![]
         }
     }
 
-    pub fn update(&mut self, client: u32, diff: i32) {
-        self.scores[client as usize] += diff;
+    pub fn update(&mut self, client: u32, diff: i32, time: u32) -> i32 {
+        let mut actual_diff = diff;
+        for (by, target, until) in &self.multiplications {
+            if client == *target && time < *until {
+                actual_diff *= *by;
+                break;
+            }
+        }
+        self.scores[client as usize] += actual_diff;
         if self.scores[client as usize] < 0 {
             self.scores[client as usize] = 0;
         }
+        actual_diff
+    }
+
+    pub fn add_multiplication(&mut self, by: i32, client: u32, until: u32) {
+        self.multiplications.push((by, client, until));
     }
 
     fn scores(&self) -> Vec<i32> {

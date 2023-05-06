@@ -8,12 +8,12 @@ use super::Object;
 
 pub struct Balloon {
     start_x: f32,
-    radius: f32,
-    color: BalloonColor,
-    lifetime: u32,
+    pub(super) radius: f32,
+    pub(super) color: BalloonColor,
+    pub(super) lifetime: u32,
     shoot_points: i32,
-    born_time: u32,
-    shot_data: Option<(u32, Coord)>,
+    pub(super) born_time: u32,
+    pub(super) shot_data: Option<(u32, Coord)>,
 }
 
 pub enum BalloonColor {
@@ -32,48 +32,67 @@ impl Balloon {
             shot_data: None,
         }
     }
+
+    pub(super) fn draw_balloon(&self, x: f32, y: f32, texture: Texture2D) {
+        draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
+            dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
+            source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
+        });
+    }
+
+    pub(super) fn draw_explosion(&self, age: u32, shot_age: u32, x: f32, y: f32, texture_store: Arc<TextureStore>) {
+        if shot_age + 50 > age && age > shot_age {
+            let variant = (age - shot_age) / 10 + 2;
+            let texture = texture_store.balloon(&self.color, variant as i32);
+            self.draw_balloon(x, y, texture);
+        }
+    }
+
+    pub(super) fn draw_point_text(&self, age: u32, shot_age: u32, x: f32, y: f32, font_size: f32, text: &str, (r, g, b): (u8, u8, u8)) {
+        let alpha = if age < shot_age + 33 {
+            ((age - shot_age) * 255 / 34) as u8
+        } else if age < shot_age + 66 {
+            255
+        } else if age < shot_age + 100 {
+            255 - ((age - shot_age - 66) * 255 / 35) as u8
+        } else {
+            0
+        };
+        draw_text(text, x, y, font_size, Color::from_rgba(r, g, b, alpha));
+    }
+
+    pub(super) fn draw_string(&self, x: f32, y: f32, variant: i32, flip: bool, texture_store: Arc<TextureStore>) {
+        if variant == 1 {
+            let string = texture_store.balloon_string(1);
+            draw_texture_ex(string, x - self.radius * 0.95914 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
+                dest_size: Some(Vec2 { x: self.radius * 0.95914, y: self.radius * 1.6834}),
+                source: None, rotation: 0.0, flip_x: flip, flip_y: false, pivot: None,
+            })
+        } else if variant == 2 {
+            let string = texture_store.balloon_string(2);
+            draw_texture_ex(string, x - self.radius * 0.08881 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
+                dest_size: Some(Vec2 { x: self.radius * 0.08881, y: self.radius * 2.2076}),
+                source: None, rotation: 0.0, flip_x: false, flip_y: false,  pivot: None,
+            } )
+        }
+    }
 }
 
 impl Object for Balloon {
     fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         if let Some((shot_time, (x, y))) = self.shot_data {
             let shot_age = shot_time - self.born_time;
-            if shot_age + 50 > age && age > shot_age {
-                let variant = (age - shot_age) / 10 + 2;
-                let texture = texture_store.balloon(&self.color, variant as i32);
-                draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
-                    dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
-                    source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
-                });
-            }
-
-            let (r, g, b) = if self.shoot_points > 0 { (0, 255, 0) } else { (255, 0, 0) };
+            self.draw_explosion(age, shot_age, x, y, texture_store.clone());
             let text = if self.shoot_points > 0 { format!("+{}", self.shoot_points) } else { format!("{}", self.shoot_points) };
-            let alpha = if age < shot_age + 33 {
-                ((age - shot_age) * 255 / 34) as u8
-            } else if age < shot_age + 66 {
-                255
-            } else if age < shot_age + 100 {
-                255 - ((age - shot_age - 66) * 255 / 35) as u8
-            } else {
-                0
-            };
-            draw_text(text.as_str(), x, y, window_size.0 / 24.0, Color::from_rgba(r, g, b, alpha));
+            let rgb = if self.shoot_points > 0 { (0, 255, 0) } else { (255, 0, 0) };
+            self.draw_point_text(age, shot_age, x, y, window_size.0 / 18.0, text.as_str(), rgb);
 
             return;
         }
         let (x, y) = center;
         let texture = texture_store.balloon(&self.color, 1);
-        draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
-            dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
-            source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
-        });
-
-        let string = texture_store.balloon_string(2);
-        draw_texture_ex(string, x - self.radius * 0.08881 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
-            dest_size: Some(Vec2 { x: self.radius * 0.08881, y: self.radius * 2.2076}),
-            source: None, rotation: 0.0, flip_x: false, flip_y: false,  pivot: None,
-        } )
+        self.draw_balloon(x, y, texture);
+        self.draw_string(x, y, 2, false, texture_store.clone());
     }
 
     fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
@@ -112,7 +131,7 @@ impl Object for Balloon {
     fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {
         if let None = self.shot_data {
             self.shot_data = Some((time, coord));
-            scoreboard.update(client, self.shoot_points);
+            self.shoot_points = scoreboard.update(client, self.shoot_points, time);
             sound_tx.send(SoundType::BalloonExplosion).ok();
         }
     }
