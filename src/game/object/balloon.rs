@@ -63,7 +63,6 @@ impl Object for Balloon {
             return;
         }
         let (x, y) = center;
-        draw_circle(x, y, self.radius, RED);
         let texture = texture_store.balloon(&self.color, 1);
         draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
@@ -97,7 +96,13 @@ impl Object for Balloon {
         let (x1, y1) = self.pos(time - self.born_time(), window_size);
         let (x2, y2) = coord;
 
-        if (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) < self.radius * self.radius {
+        let long_side = self.radius;
+        let short_side = self.radius * 0.8054;
+
+        let long_side_square = long_side * long_side;
+        let short_side_square = short_side * short_side;
+
+        if (x2 - x1) * (x2 - x1) * long_side_square + (y2 - y1) * (y2 - y1) * short_side_square < long_side_square * short_side_square {
             Some((x1, y1))
         } else {
             None
