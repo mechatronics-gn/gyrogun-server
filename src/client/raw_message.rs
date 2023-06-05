@@ -30,6 +30,8 @@ impl RawMessage {
         let r = [buf[12], buf[13], buf[14], buf[15]];
         let r = f32::from_be_bytes(r);
 
+        println!("{message_type} {y} {p} {r}");
+
         if message_type == 0 {
             return Some(RawMessage::Position((y, p, r)));
         } else if message_type == 1 {
