@@ -120,7 +120,7 @@ async fn draw(
             let (x, y) = *pos_rx.borrow_and_update();
             let crosshair = texture_store.crosshair(i % 2);
             draw_texture_ex(crosshair, width / 2.0 + x - width / 48.0, height / 2.0 - y - height / 27.0, WHITE, DrawTextureParams {
-                dest_size: Some(Vec2 { x: width / 24.0, y: height / 13.5 }),
+                dest_size: Some(Vec2 { x: width / 36.0, y: height / 20.25 }),
                 source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
             });
             i += 1;

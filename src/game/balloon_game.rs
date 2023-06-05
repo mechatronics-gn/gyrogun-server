@@ -33,7 +33,7 @@ impl Game for BalloonGame {
         if time % if time > 6000 { 200 } else { 100 } == 0 {
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
-                self.window_size.0 / 24.0 * (rand::random::<f32>() * 0.2 + 1.0),
+                self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
                 BalloonColor::Pink,
                 360,
@@ -45,7 +45,7 @@ impl Game for BalloonGame {
         if time % if time > 6000 { 100 } else { 200 } == 50 {
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
-                self.window_size.0 / 24.0 * (rand::random::<f32>() * 0.2 + 1.0),
+                self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
                 BalloonColor::Orange,
                 240,
@@ -57,7 +57,7 @@ impl Game for BalloonGame {
         if rand::random::<i32>() % 3000 == 0 {
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
-                self.window_size.0 / 24.0 * (rand::random::<f32>() * 0.2 + 1.0),
+                self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
                 BalloonColor::Green,
                 160,
@@ -69,7 +69,7 @@ impl Game for BalloonGame {
         if rand::random::<i32>() % 1200 == 0 {
             let balloon = SpecialBalloon::new(
                 rand::random::<f32>() * self.window_size.0,
-                self.window_size.0 / 24.0 * (rand::random::<f32>() * 0.2 + 1.0),
+                self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
                 BalloonColor::Yellow,
                 270,
@@ -81,7 +81,7 @@ impl Game for BalloonGame {
         if time % 150 == 20 {
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0,
-                self.window_size.0/24.0 * (rand::random::<f32>() * 0.2 + 1.0),
+                self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
                 BalloonColor::Purple,
                 300,
@@ -93,7 +93,7 @@ impl Game for BalloonGame {
         if time % 400 == 70 {
             let cloud = Cloud::new(
                 rand::random::<f32>() * self.window_size.1,
-                rand::random::<f32>() * 320.0 + 240.0,
+                rand::random::<f32>() * 320.0 + 360.0,
                 rand::random::<u32>() % 600 + 1200,
                 time,
             );

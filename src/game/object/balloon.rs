@@ -96,7 +96,7 @@ impl Object for Balloon {
     }
 
     fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
-        (self.start_x, window_size.1 - (age * 1080 / (self.lifetime-60)) as f32 + self.radius)
+        (self.start_x, window_size.1 - (age as f32 * window_size.1 / (self.lifetime-60) as f32) + self.radius)
     }
 
     fn depth(&self) -> Depth {
