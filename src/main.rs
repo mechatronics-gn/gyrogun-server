@@ -57,41 +57,48 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Somehow move this to game logic using game::Message
     let mut disconnect_count = 0;
 
-
-    let mut game = BalloonGame::new(window_size, client_count.abs() as u32);
-    let mut time = 0;
-
     loop {
-        game.on_time(time);
+
+        let mut game = BalloonGame::new(window_size, client_count.abs() as u32, 9000);
+        let mut time = 0;
 
         loop {
-            let try_recv = msg_rx.try_recv();
-            if let Err(_) = try_recv {
+            if time > 9000 {
                 break;
-            } else if let Ok((client, msg)) = try_recv {
-                if let client::Message::Disconnect = msg {
-                    disconnect_count += 1;
-
-                    if disconnect_count == client_count {
-                        println!("All clients disconnected, exiting");
-                        break;
-                    }
-                }
-
-                game.on_message(client, msg, time, &mut sounds_tx);
             }
+            game.on_time(time);
+
+            loop {
+                let try_recv = msg_rx.try_recv();
+                if let Err(_) = try_recv {
+                    break;
+                } else if let Ok((client, msg)) = try_recv {
+                    if let client::Message::Disconnect = msg {
+                        disconnect_count += 1;
+
+                        if disconnect_count == client_count {
+                            println!("All clients disconnected, exiting");
+                            break;
+                        }
+                    }
+
+                    game.on_message(client, msg, time, &mut sounds_tx);
+                }
+            }
+            time_tx.send(time).ok();
+
+            bg_color_tx.send(game.background_color(time)).ok();
+
+            if game.was_objects_updated() {
+                objects_tx.send(game.objects(time)).ok();
+            }
+
+            time += 1;
+            thread::sleep(Duration::from_millis(10));
         }
-        time_tx.send(time).ok();
-
-        bg_color_tx.send(game.background_color(time)).ok();
-
-        if game.was_objects_updated() {
-            objects_tx.send(game.objects(time)).ok();
-        }
-
-        time += 1;
-        thread::sleep(Duration::from_millis(10));
+        
     }
+
 }
 
 

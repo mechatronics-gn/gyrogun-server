@@ -7,6 +7,7 @@ use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::cloud::Cloud;
 use crate::game::object::scoreboard::{Scoreboard, ScoreboardObject};
 use crate::game::object::special_balloon::{SpecialBalloon, SpecialBalloonEffect};
+use crate::game::object::timer::Timer;
 use crate::sound::SoundType;
 use crate::wait_unwrap_and_map;
 
@@ -20,10 +21,10 @@ pub struct BalloonGame {
 }
 
 impl BalloonGame {
-    pub fn new(window_size: (f32, f32), player_count: u32) -> Self {
+    pub fn new(window_size: (f32, f32), player_count: u32, duration: u32) -> Self {
         Self {
             window_size,
-            objects: vec![],
+            objects: vec![Arc::new(Box::new(Timer::new(duration)))],
             objects_was_updated: false,
             scoreboard_was_updated: false,
             scoreboard: Scoreboard::new(player_count),
