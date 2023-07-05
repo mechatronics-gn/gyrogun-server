@@ -132,8 +132,7 @@ impl Object for ScoreboardObject {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {
-    }
+    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {}
 
     fn can_be_cleaned(&self, _time: u32) -> bool {
         false
