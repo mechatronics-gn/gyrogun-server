@@ -56,14 +56,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Somehow move this to game logic using game::Message
     let mut disconnect_count = 0;
+    let game_duration = 9000;
 
     loop {
 
-        let mut game = BalloonGame::new(window_size, client_count.abs() as u32, 9000);
+        let mut game = BalloonGame::new(window_size, client_count.abs() as u32, game_duration);
         let mut time = 0;
 
         loop {
-            if time > 9000 {
+            if time > game_duration {
                 break;
             }
             game.on_time(time);
@@ -96,7 +97,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             time += 1;
             thread::sleep(Duration::from_millis(10));
         }
-        
+
     }
 
 }
