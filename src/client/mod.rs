@@ -63,7 +63,7 @@ pub async fn handle(
                         pos_tx.send(pos).unwrap();
                     } else if let RawMessage::Click(data) = raw_message {
                         let pos = screen_pos(&init_data, data, shooter);
-                        msg_tx.send((index, Message::Click(pos))).await.unwrap();
+                        msg_tx.send((index, Message::Click(reverse_fix_pos(pos, window_size)))).await.unwrap();
                     }
                 }
 
@@ -77,6 +77,17 @@ pub async fn handle(
     });
 
     pos_rx
+}
+
+/*
+    Refer to fake.rs fix_pos
+    an reverse of the function
+ */
+fn reverse_fix_pos(pos: PosCoord, window_size: (f32, f32)) -> PosCoord {
+    let (width, height) = window_size;
+    let (x, y) = pos;
+
+    (x + width / 2.0, height / 2.0 - y)
 }
 
 fn shooter_pos(init_data: &init::InitData) -> ShooterCoord {

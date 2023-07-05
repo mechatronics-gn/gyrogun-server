@@ -1,5 +1,6 @@
 use std::ops::Add;
 use std::sync::{Arc, mpsc};
+use macroquad::color::colors;
 use macroquad::prelude::*;
 use crate::game::object::{Coord, Depth, Object};
 use crate::sound::SoundType;
@@ -42,26 +43,75 @@ impl Scoreboard {
     }
 }
 
+/*
+    State saves the rendering portion itself
+ */
+#[derive(Clone)]
 pub struct ScoreboardObject {
-    scores: Vec<i32>
+    birth_time: u32,
+    start_state: Vec<f32>,
+    target_state: Vec<f32>,
+    animation_duration: u32,
+    scores: Vec<i32>,
 }
 
 impl ScoreboardObject {
-    pub fn from(scoreboard: &Scoreboard) -> Self {
+    pub fn new(time: u32, window_size: (f32, f32), client_count: u32) -> Self {
+        let portion = window_size.0 / client_count as f32;
         Self {
-            scores: scoreboard.scores()
+            birth_time: time,
+            start_state: vec![portion; client_count as usize],
+            target_state: vec![portion; client_count as usize],
+            animation_duration: 0,
+            scores: vec![0; client_count as usize]
         }
+    }
+
+    pub fn from(scoreboard: &Scoreboard, previous: &ScoreboardObject, time: u32, animation_duration: u32, window_size: (f32, f32)) -> Self {
+        let scores = scoreboard.scores();
+        let mut sum = 0;
+        for i in &scores {
+            sum += i + 1;
+        }
+
+        Self {
+            birth_time: time,
+            start_state: previous.current_state(time).unwrap(),
+            target_state: scores.iter().map(|x| (x + 1) as f32 / sum as f32 * window_size.0).collect(),
+            animation_duration,
+            scores,
+        }
+    }
+
+    pub fn current_state(&self, time: u32) -> Option<Vec<f32>> {
+        if time < self.birth_time {
+            return None
+        }
+
+        if time > self.birth_time + self.animation_duration {
+            return Some(self.target_state.clone())
+        }
+
+        let ratio = (time - self.birth_time) as f32 / self.animation_duration as f32;
+        let mut iter = self.start_state.iter().zip(self.target_state.iter());
+        Some(iter.map(|(x, y)| x + (y-x) * ratio).collect())
     }
 }
 
 impl Object for ScoreboardObject {
     fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
-        let mut s = String::new();
-        for (i, val) in self.scores.iter().enumerate() {
-            s = s.add(format!("{}: {} points\n", i, val).as_str());
+        let mut sum = 0.;
+        for (i, val) in self.current_state(age).unwrap().iter().enumerate() {
+            let color = match i {
+                0 => RED,
+                1 => GREEN,
+                _ => WHITE,
+            };
+            draw_rectangle(sum, 0., *val, window_size.1 / 24.0, color);
+            let dimensions = measure_text(self.scores[i].to_string().as_str(), None, (window_size.1 / 18.0) as u16, 1.);
+            draw_text(self.scores[i].to_string().as_str(), sum + *val / 2. - dimensions.width / 2., window_size.1 / 48.0  - dimensions.height / 2. + dimensions.offset_y, window_size.1 / 18.0, WHITE);
+            sum += *val;
         }
-        let (x, y) = self.pos(age, window_size);
-        draw_text(s.as_str(), x, y, 30.0, BLACK);
     }
 
     fn pos(&self, _age: u32, _window_size: (f32, f32)) -> Coord {

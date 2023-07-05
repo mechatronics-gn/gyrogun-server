@@ -14,7 +14,9 @@ pub struct BalloonGame {
     window_size: (f32, f32),
     objects: Vec<Arc<Box<dyn Object + Send + Sync>>>,
     objects_was_updated: bool,
+    scoreboard_was_updated: bool,
     scoreboard: Scoreboard,
+    latest_scoreboard_object: ScoreboardObject,
 }
 
 impl BalloonGame {
@@ -23,7 +25,9 @@ impl BalloonGame {
             window_size,
             objects: vec![],
             objects_was_updated: false,
+            scoreboard_was_updated: false,
             scoreboard: Scoreboard::new(player_count),
+            latest_scoreboard_object: ScoreboardObject::new(0, window_size, player_count),
         }
     }
 }
@@ -123,6 +127,7 @@ impl Game for BalloonGame {
                             x.shoot(object_pos, time, client, &mut self.scoreboard, sound_tx);
                             // this causes a scoreboard change, resulting in a object update
                             self.objects_was_updated = true;
+                            self.scoreboard_was_updated = true;
                             shooteds.push(Arc::new(x));
                         });
                     } else {
@@ -140,9 +145,15 @@ impl Game for BalloonGame {
 
     }
 
-    fn objects(&mut self) -> Vec<ObjectWrapper> {
+    fn objects(&mut self, time: u32) -> Vec<ObjectWrapper> {
         let mut ret: Vec<ObjectWrapper> = self.objects.iter().map(|x| ObjectWrapper::Weak(Arc::downgrade(x))).collect();
-        ret.push(ObjectWrapper::Arc(Arc::new(Box::new(ScoreboardObject::from(&self.scoreboard)))));
+        if self.was_scoreboard_updated() {
+            let scoreboard_object = ScoreboardObject::from(&self.scoreboard, &self.latest_scoreboard_object, time, 150, self.window_size);
+            ret.push(ObjectWrapper::Arc(Arc::new(Box::new(scoreboard_object.clone()))));
+            self.latest_scoreboard_object = scoreboard_object;
+        } else {
+            ret.push(ObjectWrapper::Arc(Arc::new(Box::new(self.latest_scoreboard_object.clone()))));
+        }
         return ret;
     }
 
@@ -154,6 +165,14 @@ impl Game for BalloonGame {
     fn was_objects_updated(&mut self) -> bool {
         if self.objects_was_updated {
             self.objects_was_updated = false;
+            return true;
+        }
+        false
+    }
+
+    fn was_scoreboard_updated(&mut self) -> bool {
+        if self.scoreboard_was_updated {
+            self.scoreboard_was_updated = false;
             return true;
         }
         false

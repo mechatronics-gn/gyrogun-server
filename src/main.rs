@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         bg_color_tx.send(game.background_color(time)).ok();
 
         if game.was_objects_updated() {
-            objects_tx.send(game.objects()).ok();
+            objects_tx.send(game.objects(time)).ok();
         }
 
         time += 1;
