@@ -38,7 +38,7 @@ impl Scoreboard {
         self.multiplications.push((by, client, until));
     }
 
-    fn scores(&self) -> Vec<i32> {
+    pub fn scores(&self) -> Vec<i32> {
         self.scores.clone()
     }
 }

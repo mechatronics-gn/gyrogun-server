@@ -9,6 +9,7 @@ pub mod scoreboard;
 pub mod cloud;
 pub mod special_balloon;
 pub mod timer;
+pub mod game_result;
 
 type Coord = (f32, f32);
 

@@ -1,14 +1,16 @@
 use std::error::Error;
 use std::{env, thread};
+use std::os::unix::raw::time_t;
 use std::str::FromStr;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
 use gyrogun_server::client;
 use gyrogun_server::game::{Game};
 use gyrogun_server::game::balloon_game::BalloonGame;
-use gyrogun_server::texture::TextureStore;
+use gyrogun_server::game::balloon_results::BalloonResults;
+use gyrogun_server::game::object::ObjectWrapper;
+use gyrogun_server::sound::SoundType;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -56,50 +58,67 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Somehow move this to game logic using game::Message
     let mut disconnect_count = 0;
-    let game_duration = 9000;
 
     loop {
-
+        let game_duration = 2000;
         let mut game = BalloonGame::new(window_size, client_count.abs() as u32, game_duration);
         let mut time = 0;
 
-        loop {
-            if time > game_duration {
-                break;
-            }
-            game.on_time(time);
-
-            loop {
-                let try_recv = msg_rx.try_recv();
-                if let Err(_) = try_recv {
-                    break;
-                } else if let Ok((client, msg)) = try_recv {
-                    if let client::Message::Disconnect = msg {
-                        disconnect_count += 1;
-
-                        if disconnect_count == client_count {
-                            println!("All clients disconnected, exiting");
-                            break;
-                        }
-                    }
-
-                    game.on_message(client, msg, time, &mut sounds_tx);
-                }
-            }
-            time_tx.send(time).ok();
-
-            bg_color_tx.send(game.background_color(time)).ok();
-
-            if game.was_objects_updated() {
-                objects_tx.send(game.objects(time)).ok();
-            }
-
-            time += 1;
+        while time <= game_duration {
+            single_frame(&mut game, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
             thread::sleep(Duration::from_millis(10));
         }
 
+        let results_duration = 1500;
+        let mut results = BalloonResults::from(window_size, &game);
+        let mut time = 0;
+
+        while time <= results_duration {
+            single_frame(&mut results, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
+            thread::sleep(Duration::from_millis(10));
+        }
     }
 
 }
 
+fn single_frame<T: Game>(
+    game: &mut T,
+    time: &mut u32,
+    disconnect_count: &mut i32,
+    client_count: i32,
+    msg_rx: &mut tokio::sync::mpsc::Receiver<(u32, client::Message)>,
+    sounds_tx: &mut std::sync::mpsc::Sender<SoundType>,
+    time_tx: &tokio::sync::watch::Sender<u32>,
+    bg_color_tx: &tokio::sync::watch::Sender<macroquad::color::Color>,
+    objects_tx: &tokio::sync::watch::Sender<Vec<ObjectWrapper>>,
+) {
+    game.on_time(*time);
+
+    loop {
+        let try_recv = msg_rx.try_recv();
+        if let Err(_) = try_recv {
+            break;
+        } else if let Ok((client, msg)) = try_recv {
+            if let client::Message::Disconnect = msg {
+                *disconnect_count += 1;
+
+                if *disconnect_count == client_count {
+                    println!("All clients disconnected, exiting");
+                    break;
+                }
+            }
+
+            game.on_message(client, msg, *time, sounds_tx);
+        }
+    }
+    time_tx.send(*time).ok();
+
+    bg_color_tx.send(game.background_color(*time)).ok();
+
+    if game.was_objects_updated() {
+        objects_tx.send(game.objects(*time)).ok();
+    }
+
+    *time += 1;
+}
 

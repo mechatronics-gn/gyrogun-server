@@ -6,6 +6,7 @@ use crate::sound::SoundType;
 
 pub mod object;
 pub mod balloon_game;
+pub mod balloon_results;
 
 
 pub trait Game {
@@ -14,6 +15,5 @@ pub trait Game {
     fn objects(&mut self, time: u32) -> Vec<ObjectWrapper>;
     fn add_objects(&mut self, object: Arc<Box<dyn Object + Send + Sync>>);
     fn was_objects_updated(&mut self) -> bool;
-    fn was_scoreboard_updated(&mut self) -> bool;
     fn background_color(&self, time: u32) -> Color;
 }

@@ -31,6 +31,19 @@ impl BalloonGame {
             latest_scoreboard_object: ScoreboardObject::new(0, window_size, player_count),
         }
     }
+
+    pub fn scores(&self) -> Vec<i32> {
+        self.scoreboard.scores()
+    }
+
+    fn was_scoreboard_updated(&mut self) -> bool {
+        if self.scoreboard_was_updated {
+            self.scoreboard_was_updated = false;
+            return true;
+        }
+        false
+    }
+
 }
 
 impl Game for BalloonGame {
@@ -166,14 +179,6 @@ impl Game for BalloonGame {
     fn was_objects_updated(&mut self) -> bool {
         if self.objects_was_updated {
             self.objects_was_updated = false;
-            return true;
-        }
-        false
-    }
-
-    fn was_scoreboard_updated(&mut self) -> bool {
-        if self.scoreboard_was_updated {
-            self.scoreboard_was_updated = false;
             return true;
         }
         false
