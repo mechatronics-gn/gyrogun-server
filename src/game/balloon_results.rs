@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
 use macroquad::color::Color;
-use macroquad::rand::ChooseRandom;
 use crate::client::Message;
 use crate::game::balloon_game::BalloonGame;
 use crate::game::Game;
@@ -61,9 +60,9 @@ impl Game for BalloonResults {
         }
     }
 
-    fn on_message(&mut self, client: u32, message: Message, time: u32, sound_tx: &mut Sender<SoundType>) {}
+    fn on_message(&mut self, _client: u32, _message: Message, _time: u32, _sound_tx: &mut Sender<SoundType>) {}
 
-    fn objects(&mut self, time: u32) -> Vec<ObjectWrapper> {
+    fn objects(&mut self, _time: u32) -> Vec<ObjectWrapper> {
         self.objects.iter().map(|x| ObjectWrapper::Weak(Arc::downgrade(x))).collect()
     }
 
@@ -80,7 +79,7 @@ impl Game for BalloonResults {
         false
     }
 
-    fn background_color(&self, time: u32) -> Color {
+    fn background_color(&self, _time: u32) -> Color {
         Color::from_rgba(147, 169, 209, 0)
     }
 }

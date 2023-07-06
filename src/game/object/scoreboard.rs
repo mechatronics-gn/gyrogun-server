@@ -1,6 +1,4 @@
-use std::ops::Add;
 use std::sync::{Arc, mpsc};
-use macroquad::color::colors;
 use macroquad::prelude::*;
 use crate::game::object::{Coord, Depth, Object};
 use crate::sound::SoundType;
@@ -93,13 +91,13 @@ impl ScoreboardObject {
         }
 
         let ratio = (time - self.birth_time) as f32 / self.animation_duration as f32;
-        let mut iter = self.start_state.iter().zip(self.target_state.iter());
+        let iter = self.start_state.iter().zip(self.target_state.iter());
         Some(iter.map(|(x, y)| x + (y-x) * ratio).collect())
     }
 }
 
 impl Object for ScoreboardObject {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
+    fn draw(&self, _center: Coord, age: u32, window_size: (f32, f32), _texture_store: Arc<TextureStore>) {
         let mut sum = 0.;
         for (i, val) in self.current_state(age).unwrap().iter().enumerate() {
             let color = match i {
@@ -132,7 +130,7 @@ impl Object for ScoreboardObject {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {}
+    fn shoot(&mut self, _coord: Coord, _time: u32, _client: u32, _scoreboard: &mut Scoreboard, _sound_tx: &mut mpsc::Sender<SoundType>) {}
 
     fn can_be_cleaned(&self, _time: u32) -> bool {
         false

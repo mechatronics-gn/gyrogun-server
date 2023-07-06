@@ -4,7 +4,7 @@ use macroquad::Window;
 use mpsc::Sender;
 use tokio::sync::watch;
 use std::sync::{Arc, mpsc};
-use macroquad::audio::{load_sound_from_bytes, play_sound_once};
+use macroquad::audio::play_sound_once;
 use crate::client::PosCoord;
 use crate::client::fake;
 use crate::game::object::{Depth, ObjectWrapper};

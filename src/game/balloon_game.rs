@@ -184,7 +184,7 @@ impl Game for BalloonGame {
         false
     }
 
-    fn background_color(&self, time: u32) -> Color {
+    fn background_color(&self, _time: u32) -> Color {
         Color::from_rgba(147, 169, 209, 0)
     }
 }

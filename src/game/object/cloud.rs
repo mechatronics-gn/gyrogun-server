@@ -26,7 +26,7 @@ impl Cloud {
 }
 
 impl Object for Cloud {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
+    fn draw(&self, center: Coord, _age: u32, _window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         let (x, y) = center;
         draw_texture_ex(texture_store.cloud(self.variant), x-self.width()/2.0, y-self.height/2.0, WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: self.width(), y: self.height }),
@@ -50,11 +50,11 @@ impl Object for Cloud {
         self.born_time
     }
 
-    fn shoot_check(&self, coord: Coord, time: u32, window_size: (f32, f32)) -> Option<Coord> {
+    fn shoot_check(&self, _coord: Coord, _time: u32, _window_size: (f32, f32)) -> Option<Coord> {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut mpsc::Sender<SoundType>) {
+    fn shoot(&mut self, _coord: Coord, _time: u32, _client: u32, _scoreboard: &mut Scoreboard, _sound_tx: &mut mpsc::Sender<SoundType>) {
     }
 
     fn can_be_cleaned(&self, time: u32) -> bool {
