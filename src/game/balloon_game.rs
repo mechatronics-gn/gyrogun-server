@@ -53,7 +53,7 @@ impl Game for BalloonGame {
                 rand::random::<f32>() * self.window_size.0,
                 self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
-                BalloonColor::Pink,
+                BalloonColor::Orange,
                 360,
                 1
             );
@@ -65,7 +65,7 @@ impl Game for BalloonGame {
                 rand::random::<f32>() * self.window_size.0,
                 self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
-                BalloonColor::Orange,
+                BalloonColor::Red,
                 240,
                 2
             );
