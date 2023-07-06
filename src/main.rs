@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut disconnect_count = 0;
 
     loop {
-        let game_duration = 2000;
+        let game_duration = 9000;
         let mut game = BalloonGame::new(window_size, client_count.abs() as u32, game_duration);
         let mut time = 0;
 

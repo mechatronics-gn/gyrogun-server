@@ -13,6 +13,8 @@ impl TextureStore {
 
         map.insert("crosshair-red".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/crosshair_red_small.png"), Some(ImageFormat::Png)));
         map.insert("crosshair-green".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/crosshair_green_small.png"), Some(ImageFormat::Png)));
+        map.insert("crosshair-yellow".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/crosshair_yellow_small.png"), Some(ImageFormat::Png)));
+        map.insert("crosshair-blue".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/crosshair_blue_small.png"), Some(ImageFormat::Png)));
 
         map.insert("balloon-blue-1".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/balloons/blue-balloon/1.png"), Some(ImageFormat::Png)));
         map.insert("balloon-blue-2".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/balloons/blue-balloon/2.png"), Some(ImageFormat::Png)));
@@ -70,7 +72,7 @@ impl TextureStore {
     }
 
     pub fn crosshair(&self, variant: i32) -> Texture2D {
-        self.store.get(format!("crosshair-{}", if variant == 0 { "red" } else { "green" }).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("crosshair-{}", match variant { 0 => { "red" }, 1 => { "green" }, 2 => { "yellow" }, 3 => { "blue" }, _ => { "" } }).as_str()).map_or(Texture2D::empty(), |x| *x)
     }
 
     pub fn balloon(&self, color: &BalloonColor, variant: i32) -> Texture2D {

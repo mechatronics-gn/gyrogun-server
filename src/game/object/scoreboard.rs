@@ -101,8 +101,10 @@ impl Object for ScoreboardObject {
         let mut sum = 0.;
         for (i, val) in self.current_state(age).unwrap().iter().enumerate() {
             let color = match i {
-                0 => RED,
-                1 => GREEN,
+                0 => Color::from_rgba(226, 0, 1, 255),
+                1 => Color::from_rgba(0, 189, 1, 255),
+                2 => Color::from_rgba(248, 213 ,60, 255),
+                3 => Color::from_rgba(57, 32, 214, 255),
                 _ => WHITE,
             };
             draw_rectangle(sum, 0., *val, window_size.1 / 24.0, color);

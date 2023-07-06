@@ -45,7 +45,9 @@ impl Game for BalloonResults {
             let color = |x| { match x {
                 0 => { BalloonColor::Red },
                 1 => { BalloonColor::Green },
-                _ => { BalloonColor::Blue }
+                2 => { BalloonColor::Yellow },
+                3 => { BalloonColor::Blue },
+                _ => { BalloonColor::Orange },
             }};
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0 * 0.25 + self.window_size.0 * 0.6,
