@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
 use macroquad::color::Color;
+use macroquad::rand::ChooseRandom;
 use crate::client::Message;
 use crate::game::balloon_game::BalloonGame;
 use crate::game::Game;
@@ -28,21 +29,30 @@ impl BalloonResults {
 }
 
 impl Game for BalloonResults {
-    // TODO: Spawn various colors on draw
     fn on_time(&mut self, time: u32) {
         if time % 20 == 0 && time < 300 {
             let mut x: Vec<(usize, &i32)> = self.scores.iter().enumerate().collect();
             x.sort_by(|(_, a), (_, b)| { (**b).partial_cmp(*a).unwrap() });
-            let color = match x[0] {
-                (0, _) => { BalloonColor::Red },
-                (1, _) => { BalloonColor::Green },
+            let mut winners = vec![];
+            let mut max = -1;
+            for (i, val) in x {
+                if *val >= max {
+                    max = *val;
+                    winners.push(i);
+                } else {
+                    break;
+                }
+            }
+            let color = |x| { match x {
+                0 => { BalloonColor::Red },
+                1 => { BalloonColor::Green },
                 _ => { BalloonColor::Blue }
-            };
+            }};
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0 * 0.25 + self.window_size.0 * 0.6,
                 self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
-                color,
+                color(winners[rand::random::<usize>() % winners.len()]),
                 240,
                 0
             );
