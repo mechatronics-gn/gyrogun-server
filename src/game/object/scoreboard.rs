@@ -1,5 +1,6 @@
 use std::sync::{Arc, mpsc};
 use macroquad::prelude::*;
+use crate::draw_text_center_align;
 use crate::game::object::{Coord, Depth, Object};
 use crate::sound::SoundType;
 use crate::texture::TextureStore;
@@ -108,8 +109,7 @@ impl Object for ScoreboardObject {
                 _ => WHITE,
             };
             draw_rectangle(sum, 0., *val, window_size.1 / 24.0, color);
-            let dimensions = measure_text(self.scores[i].to_string().as_str(), None, (window_size.1 / 18.0) as u16, 1.);
-            draw_text(self.scores[i].to_string().as_str(), sum + *val / 2. - dimensions.width / 2., window_size.1 / 48.0  - dimensions.height / 2. + dimensions.offset_y, window_size.1 / 18.0, WHITE);
+            draw_text_center_align(self.scores[i].to_string().as_str(), sum + *val / 2., window_size.1 / 48.0, window_size.1 / 18.0, WHITE);
             sum += *val;
         }
     }

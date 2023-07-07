@@ -1,4 +1,7 @@
 use std::sync::Arc;
+use macroquad::color::Color;
+use macroquad::prelude::draw_text;
+use macroquad::text::measure_text;
 
 pub mod client;
 pub mod display;
@@ -20,4 +23,9 @@ pub fn wait_unwrap_and_map<T, V, F>(arc: Arc<T>, call: F) -> V
             wait_unwrap_and_map(x, call)
         }
     }
+}
+
+pub fn draw_text_center_align(text: &str, x: f32, y: f32, font_size: f32, color: Color) {
+    let dimensions = measure_text(text, None, font_size as u16, 1.);
+    draw_text(text, x - dimensions.width / 2., y - dimensions.height / 2. + dimensions.offset_y, font_size, color);
 }
