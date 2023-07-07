@@ -1,6 +1,6 @@
 use std::sync::{Arc, mpsc};
 use macroquad::prelude::*;
-use crate::draw_text_center_align;
+use crate::{draw_text_center_align, player_to_color};
 use crate::game::object::{Coord, Depth, Object};
 use crate::sound::SoundType;
 use crate::texture::TextureStore;
@@ -101,13 +101,7 @@ impl Object for ScoreboardObject {
     fn draw(&self, _center: Coord, age: u32, window_size: (f32, f32), _texture_store: Arc<TextureStore>) {
         let mut sum = 0.;
         for (i, val) in self.current_state(age).unwrap().iter().enumerate() {
-            let color = match i {
-                0 => Color::from_rgba(226, 0, 1, 255),
-                1 => Color::from_rgba(0, 189, 1, 255),
-                2 => Color::from_rgba(248, 213 ,60, 255),
-                3 => Color::from_rgba(57, 32, 214, 255),
-                _ => WHITE,
-            };
+            let color = player_to_color(i);
             draw_rectangle(sum, 0., *val, window_size.1 / 24.0, color);
             draw_text_center_align(self.scores[i].to_string().as_str(), sum + *val / 2., window_size.1 / 48.0, window_size.1 / 18.0, WHITE);
             sum += *val;

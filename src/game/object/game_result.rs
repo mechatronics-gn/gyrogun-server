@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
 use macroquad::prelude::*;
+use crate::{draw_text_center_align, player_to_color};
 use crate::game::object::{Coord, Depth, Object};
 use crate::game::object::scoreboard::Scoreboard;
 use crate::sound::SoundType;
@@ -19,16 +20,27 @@ impl GameResult {
 }
 
 impl Object for GameResult {
-    fn draw(&self, center: Coord, _age: u32, _window_size: (f32, f32), _texture_store: Arc<TextureStore>) {
-        draw_text("I am too lazy", center.0, center.1, 100., WHITE);
-        for (i, value) in self.scores.iter().enumerate() {
-            draw_text(format!("{}: {}\n", i, value).as_str(), center.0, center.1 + (i + 1) as f32 * 100., 100., WHITE);
+    fn draw(&self, center: Coord, _age: u32, window_size: (f32, f32), _texture_store: Arc<TextureStore>) {
+        let (w, h) = window_size;
+        draw_text_center_align("Good game!", center.0 + w * 0.2 + 5., center.1 + 5., h * 0.1, BLACK);
+        draw_text_center_align("Good game!", center.0 + w * 0.2, center.1, h * 0.1, WHITE);
+        let mut x: Vec<(usize, &i32)> = self.scores.iter().enumerate().collect();
+        x.sort_by(|(_, a), (_, b)| { (**b).partial_cmp(*a).unwrap() });
+
+        let mut cnt = 1;
+        let max_score = *x[0].1 as f32;
+        for (i, value) in x {
+            draw_rectangle(center.0 + 5., center.1 + cnt as f32 * h * 0.12 + 5., w * 0.4 * (*value) as f32 / max_score, h * 0.08, BLACK);
+            draw_rectangle(center.0, center.1 + cnt as f32 * h * 0.12, w * 0.4 * (*value) as f32 / max_score, h * 0.08, player_to_color(i));
+
+            draw_text_center_align(format!("{}", value).as_str(), center.0 + w * 0.02, center.1 + cnt as f32 * h * 0.12 + h * 0.04, h * 0.1, WHITE);
+            cnt += 1;
         }
     }
 
     fn pos(&self, _age: u32, window_size: (f32, f32)) -> Coord {
         let (w, h) = window_size;
-        (w / 2., h / 2.)
+        (w * 0.08, h * 0.25)
     }
 
     fn depth(&self) -> Depth {

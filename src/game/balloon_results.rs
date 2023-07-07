@@ -6,7 +6,9 @@ use crate::game::balloon_game::BalloonGame;
 use crate::game::Game;
 use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::balloon::{Balloon, BalloonColor};
+use crate::game::object::cloud::Cloud;
 use crate::game::object::game_result::GameResult;
+use crate::player_to_balloon_color;
 use crate::sound::SoundType;
 
 pub struct BalloonResults {
@@ -42,23 +44,27 @@ impl Game for BalloonResults {
                     break;
                 }
             }
-            let color = |x| { match x {
-                0 => { BalloonColor::Red },
-                1 => { BalloonColor::Green },
-                2 => { BalloonColor::Yellow },
-                3 => { BalloonColor::Blue },
-                _ => { BalloonColor::Orange },
-            }};
             let balloon = Balloon::new(
                 rand::random::<f32>() * self.window_size.0 * 0.25 + self.window_size.0 * 0.6,
                 self.window_size.0 / 32.0 * (rand::random::<f32>() * 0.2 + 1.0),
                 time,
-                color(winners[rand::random::<usize>() % winners.len()]),
+                player_to_balloon_color(winners[rand::random::<usize>() % winners.len()]),
                 240,
                 0
             );
             let balloon: Arc<Box<dyn Object + Send+ Sync>> = Arc::new(Box::new(balloon));
             self.add_objects(balloon.clone());
+        }
+
+        if time % 400 == 70 {
+            let cloud = Cloud::new(
+                rand::random::<f32>() * self.window_size.1,
+                rand::random::<f32>() * 320.0 + 360.0,
+                rand::random::<u32>() % 600 + 1200,
+                time,
+            );
+            let cloud: Arc<Box<dyn Object + Send + Sync>> = Arc::new(Box::new(cloud));
+            self.add_objects(cloud.clone());
         }
     }
 
