@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
 use macroquad::prelude::*;
+use crate::draw_text_center_align;
 use crate::game::object::{Coord, Depth, Object};
 use crate::game::object::scoreboard::Scoreboard;
 use crate::sound::SoundType;
@@ -21,7 +22,16 @@ impl Timer {
 impl Object for Timer {
     fn draw(&self, _center: Coord, age: u32, window_size: (f32, f32), _texture_store: Arc<TextureStore>) {
         let (w, h) = window_size;
-        draw_text(((self.end_at - age) / 100).to_string().as_str(), w / 2., h * 0.9, h * 0.1, WHITE);
+        let timer = self.end_at - age;
+        let color = if timer < 1000 && timer % 100 >= 50 {
+            RED
+        } else if 1000 <= timer &&  timer < 3000 && timer % 200 >= 100 {
+            RED
+        } else {
+            WHITE
+        };
+        draw_text_center_align((timer / 100).to_string().as_str(), w / 2. + 5., h * 0.925 + 5., h * 0.15, BLACK);
+        draw_text_center_align((timer / 100).to_string().as_str(), w / 2., h * 0.925, h * 0.15, color);
     }
 
     fn pos(&self, _age: u32, window_size: (f32, f32)) -> Coord {
