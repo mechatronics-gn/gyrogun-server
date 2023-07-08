@@ -6,7 +6,7 @@ use crate::client::init::InitPhase;
 use crate::client::raw_message::RawMessage;
 
 pub mod fake;
-mod init;
+pub mod init;
 mod raw_message;
 
 type SensorData = (f32, f32, f32);
@@ -23,6 +23,8 @@ pub enum Message {
 pub async fn handle(
     mut socket: TcpStream, addr: SocketAddr, index: u32,
     msg_tx: mpsc::Sender<(u32, Message)>,
+    mut next_phase_rx: watch::Receiver<Option<InitPhase>>,
+    done_phase_tx: watch::Sender<Option<InitPhase>>,
     window_size: (f32, f32),
 ) -> watch::Receiver<PosCoord> {
     println!("Handling connection of client #{index}, {addr}");
@@ -30,13 +32,13 @@ pub async fn handle(
     let (pos_tx, pos_rx) = watch::channel((0.0, 0.0));
 
     tokio::spawn(async move {
-        let mut phase = Some(init::InitPhase::WaitMonitor);
-
+        let mut phase;
         let mut init_data = init::InitData::new(window_size);
         let mut shooter: ShooterCoord = (0.0, 0.0, 0.0);
 
         loop {
             let raw_message = RawMessage::read(&mut socket).await;
+            phase = *next_phase_rx.borrow();
 
             if let Some(raw_message) = raw_message {
                 if let Some(p) = &phase {
@@ -44,18 +46,18 @@ pub async fn handle(
                         match p {
                             InitPhase::WaitMonitor => {
                                 init_data.set_monitor(data);
-                                phase = Some(InitPhase::WaitFirstPoint);
                             }
                             InitPhase::WaitFirstPoint => {
                                 init_data.set_first_point(data);
-                                phase = Some(InitPhase::WaitSecondPoint);
                             }
                             InitPhase::WaitSecondPoint => {
                                 init_data.set_second_point(data);
-                                phase = None;
+                            }
+                            InitPhase::Finalize => {
                                 shooter = shooter_pos(&init_data);
                             }
                         }
+                        done_phase_tx.send(Some(*p)).unwrap();
                     }
                 } else {
                     if let RawMessage::Position(data) = raw_message {

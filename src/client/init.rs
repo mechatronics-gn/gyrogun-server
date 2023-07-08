@@ -1,9 +1,11 @@
 use crate::client::SensorData;
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum InitPhase {
     WaitMonitor,
     WaitFirstPoint,
     WaitSecondPoint,
+    Finalize,
 }
 
 pub struct InitData {

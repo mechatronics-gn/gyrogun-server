@@ -7,6 +7,7 @@ use crate::sound::SoundType;
 pub mod object;
 pub mod balloon_game;
 pub mod balloon_results;
+pub mod tutorial;
 
 
 pub trait Game {

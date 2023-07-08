@@ -1,14 +1,18 @@
 use std::error::Error;
 use std::{env, thread};
+use std::os::unix::raw::time_t;
 use std::str::FromStr;
 use std::time::Duration;
+use macroquad::window::next_frame;
 use tokio::net::TcpListener;
 
 use gyrogun_server::client;
+use gyrogun_server::client::init::InitPhase;
 use gyrogun_server::game::{Game};
 use gyrogun_server::game::balloon_game::BalloonGame;
 use gyrogun_server::game::balloon_results::BalloonResults;
 use gyrogun_server::game::object::ObjectWrapper;
+use gyrogun_server::game::tutorial::Tutorial;
 use gyrogun_server::sound::SoundType;
 
 #[tokio::main]
@@ -33,14 +37,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (bg_color_tx, bg_color_rx) = tokio::sync::watch::channel(macroquad::color::WHITE);
     let (mut sounds_tx, sounds_rx) = std::sync::mpsc::channel();
 
+
+    let mut next_phase_txs = vec![];
+    let mut done_phase_rxs = vec![];
     if client_count > 0 {
         let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
         for i in 0..client_count {
             let (socket, addr) = listener.accept().await.unwrap();
 
-            let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone(), window_size).await;
+            let (next_phase_tx, next_phase_rx) = tokio::sync::watch::channel(None);
+            let (done_phase_tx, done_phase_rx) = tokio::sync::watch::channel(None);
+            let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone(), next_phase_rx, done_phase_tx, window_size).await;
 
             pos_rxs.push(pos_rx);
+            next_phase_txs.push(next_phase_tx);
+            done_phase_rxs.push(done_phase_rx);
         }
 
         gyrogun_server::display::launch(pos_rxs, window_size, None, objects_rx, time_rx, bg_color_rx, sounds_rx);
@@ -59,6 +70,57 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut disconnect_count = 0;
 
     loop {
+        // Initialize
+        if client_count > 0 {
+            let mut init_phase = Some(InitPhase::WaitMonitor);
+            let mut tutorial = Tutorial::new(init_phase.unwrap());
+            let mut time = 0;
+            loop {
+                for i in &next_phase_txs {
+                    i.send(init_phase).unwrap();
+                }
+
+                let mut x: Vec<InitPhase>;
+                loop {
+                    x = done_phase_rxs.iter().map(|x| x.borrow().unwrap()).collect();
+                    if x.iter().all(|t| *t == x[0]) {
+                        break;
+                    }
+
+                    single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
+                    thread::sleep(Duration::from_millis(10));
+                }
+
+                match x[0] {
+                    InitPhase::WaitMonitor => {
+                        init_phase = Some(InitPhase::WaitFirstPoint);
+                        tutorial.update_init_phase(InitPhase::WaitFirstPoint, time, 100);
+                        thread::sleep(Duration::from_secs(1));
+                    }
+                    InitPhase::WaitFirstPoint => {
+                        init_phase = Some(InitPhase::WaitSecondPoint);
+                        tutorial.update_init_phase(InitPhase::WaitSecondPoint, time, 100);
+                        thread::sleep(Duration::from_secs(1));
+                    }
+                    InitPhase::WaitSecondPoint => {
+                        init_phase = Some(InitPhase::Finalize);
+                        tutorial.update_init_phase(InitPhase::Finalize, time, 100);
+                        thread::sleep(Duration::from_secs(1));
+                    }
+                    InitPhase::Finalize => {
+                        init_phase = None;
+                        thread::sleep(Duration::from_secs(1));
+
+                        for i in &next_phase_txs {
+                            i.send(init_phase).unwrap();
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
         let game_duration = 9000;
         let mut game = BalloonGame::new(window_size, client_count.abs() as u32, game_duration);
         let mut time = 0;
