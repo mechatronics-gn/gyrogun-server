@@ -10,6 +10,8 @@ pub mod cloud;
 pub mod special_balloon;
 pub mod timer;
 pub mod game_result;
+pub mod full_screen_image;
+pub mod correction_circle;
 
 type Coord = (f32, f32);
 

@@ -5,6 +5,8 @@ use crate::game::Game;
 use crate::game::object::balloon::{Balloon, BalloonColor};
 use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::cloud::Cloud;
+use crate::game::object::correction_circle::CorrectionCircle;
+use crate::game::object::full_screen_image::FullScreenImage;
 use crate::game::object::scoreboard::{Scoreboard, ScoreboardObject};
 use crate::game::object::special_balloon::{SpecialBalloon, SpecialBalloonEffect};
 use crate::game::object::timer::Timer;
@@ -24,7 +26,7 @@ impl BalloonGame {
     pub fn new(window_size: (f32, f32), player_count: u32, duration: u32) -> Self {
         Self {
             window_size,
-            objects: vec![Arc::new(Box::new(Timer::new(duration)))],
+            objects: vec![Arc::new(Box::new(Timer::new(duration))), Arc::new(Box::new(CorrectionCircle::new(false, 1)))],
             objects_was_updated: false,
             scoreboard_was_updated: false,
             scoreboard: Scoreboard::new(player_count),

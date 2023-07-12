@@ -121,7 +121,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        let game_duration = 9000;
+        let game_duration = 6000;
         let mut game = BalloonGame::new(window_size, client_count.abs() as u32, game_duration);
         let mut time = 0;
 

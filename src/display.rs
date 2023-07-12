@@ -113,8 +113,6 @@ async fn draw(
             }
         }
 
-        draw_circle(width / 2.0 - height / 2.0, height / 2.0, 20.0, GREEN);
-        draw_circle(width / 2.0 + height / 2.0, height / 2.0, 20.0, GREEN);
         let mut i = 0;
         for pos_rx in &mut pos_rxs {
             let (x, y) = *pos_rx.borrow_and_update();

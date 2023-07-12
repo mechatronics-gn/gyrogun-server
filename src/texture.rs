@@ -66,6 +66,11 @@ impl TextureStore {
         map.insert("cloud-2".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/cloud2.PNG"), Some(ImageFormat::Png)));
         map.insert("cloud-3".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/cloud3.PNG"), Some(ImageFormat::Png)));
 
+        map.insert("fsi-1".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/fsi1.png"), Some(ImageFormat::Png)));
+        map.insert("fsi-2".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/fsi2.png"), Some(ImageFormat::Png)));
+        map.insert("fsi-3".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/fsi3.png"), Some(ImageFormat::Png)));
+        map.insert("fsi-4".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/fsi4.png"), Some(ImageFormat::Png)));
+
         TextureStore {
             store: map
         }
@@ -94,5 +99,9 @@ impl TextureStore {
     
     pub fn cloud(&self, variant: i32) -> Texture2D {
         self.store.get(format!("cloud-{}", variant).as_str()).map_or(Texture2D::empty(), |x| *x)
+    }
+
+    pub fn full_screen_image(&self, idx: i32) -> Texture2D {
+        self.store.get(format!("fsi-{}", idx).as_str()).map_or(Texture2D::empty(), |x| *x)
     }
 }
