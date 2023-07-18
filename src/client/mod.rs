@@ -40,21 +40,29 @@ pub async fn handle(
             let raw_message = RawMessage::read(&mut socket).await;
             phase = *next_phase_rx.borrow();
 
+            if let None = &phase {
+                done_phase_tx.send(None).unwrap();
+            }
+
             if let Some(raw_message) = raw_message {
                 if let Some(p) = &phase {
                     if let RawMessage::Click(data) = raw_message {
                         match p {
                             InitPhase::WaitMonitor => {
                                 init_data.set_monitor(data);
+                                println!("Wait monitor {index} done")
                             }
                             InitPhase::WaitFirstPoint => {
                                 init_data.set_first_point(data);
+                                println!("Wait first point {index} done")
                             }
                             InitPhase::WaitSecondPoint => {
                                 init_data.set_second_point(data);
+                                println!("Wait second point {index} done")
                             }
                             InitPhase::Finalize => {
                                 shooter = shooter_pos(&init_data);
+                                println!("Wait finalize {index} done")
                             }
                         }
                         done_phase_tx.send(Some(*p)).unwrap();

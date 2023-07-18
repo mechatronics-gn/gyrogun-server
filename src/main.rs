@@ -72,19 +72,39 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         // Initialize
         if client_count > 0 {
+            println!("Starting initialize");
             let mut init_phase = Some(InitPhase::WaitMonitor);
             let mut tutorial = Tutorial::new(init_phase.unwrap());
             let mut time = 0;
             loop {
+                for i in &mut done_phase_rxs {
+                    i.borrow_and_update();
+
+                }
+
                 for i in &next_phase_txs {
                     i.send(init_phase).unwrap();
                 }
 
+                println!("sent next phase tx {:?}", init_phase);
+
                 let mut x: Vec<InitPhase>;
                 loop {
-                    x = done_phase_rxs.iter().map(|x| x.borrow().unwrap()).collect();
-                    if x.iter().all(|t| *t == x[0]) {
-                        break;
+                    let mut flag = false;
+                    for i in &done_phase_rxs {
+                        let x = i.borrow();
+                        if x.is_none() {
+                            flag = true;
+                        }
+                    }
+
+                    if !flag {
+                        println!("Flag false; checking done phase rxs");
+                        x = done_phase_rxs.iter().map(|x| x.borrow().unwrap()).collect();
+                        if x.iter().all(|t| *t == x[0]) {
+                            break;
+                        }
+                        println!("Did not break");
                     }
 
                     single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
@@ -93,23 +113,32 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 match x[0] {
                     InitPhase::WaitMonitor => {
+                        println!("Initphase is waitmonitor and going to exit here");
                         init_phase = Some(InitPhase::WaitFirstPoint);
-                        tutorial.update_init_phase(InitPhase::WaitFirstPoint, time, 100);
+                        tutorial.update_init_phase(InitPhase::WaitFirstPoint, time, 80);
                         thread::sleep(Duration::from_secs(1));
+                        time += 100;
+                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     }
                     InitPhase::WaitFirstPoint => {
                         init_phase = Some(InitPhase::WaitSecondPoint);
-                        tutorial.update_init_phase(InitPhase::WaitSecondPoint, time, 100);
+                        tutorial.update_init_phase(InitPhase::WaitSecondPoint, time, 80);
                         thread::sleep(Duration::from_secs(1));
+                        time += 100;
+                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     }
                     InitPhase::WaitSecondPoint => {
                         init_phase = Some(InitPhase::Finalize);
-                        tutorial.update_init_phase(InitPhase::Finalize, time, 100);
+                        tutorial.update_init_phase(InitPhase::Finalize, time, 80);
                         thread::sleep(Duration::from_secs(1));
+                        time += 100;
+                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     }
                     InitPhase::Finalize => {
                         init_phase = None;
                         thread::sleep(Duration::from_secs(1));
+                        time += 100;
+                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
 
                         for i in &next_phase_txs {
                             i.send(init_phase).unwrap();
@@ -120,6 +149,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
         }
+
+        println!("Getting into game");
 
         let game_duration = 6000;
         let mut game = BalloonGame::new(window_size, client_count.abs() as u32, game_duration);

@@ -44,17 +44,21 @@ impl Game for Tutorial {
                 self.new_init_phase = None;
                 match x {
                     InitPhase::WaitMonitor => {
+                        println!("Waitmonitor");
                         self.add_objects(Arc::new(Box::new(FullScreenImage::new(1, 0))));
                     }
                     InitPhase::WaitFirstPoint => {
+                        println!("Waitfp");
                         self.add_objects(Arc::new(Box::new(FullScreenImage::new(2, 1))));
                         self.add_objects(Arc::new(Box::new(CorrectionCircle::new(true, 2))));
                     }
                     InitPhase::WaitSecondPoint => {
+                        println!("Waitsp");
                         self.add_objects(Arc::new(Box::new(FullScreenImage::new(3, 3))));
                         self.add_objects(Arc::new(Box::new(CorrectionCircle::new(false, 4))));
                     }
                     InitPhase::Finalize => {
+                        println!("finalize");
                         self.add_objects(Arc::new(Box::new(FullScreenImage::new(4, 5))));
                     }
                 }
