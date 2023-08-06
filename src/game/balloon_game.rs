@@ -5,8 +5,6 @@ use crate::game::Game;
 use crate::game::object::balloon::{Balloon, BalloonColor};
 use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::cloud::Cloud;
-use crate::game::object::correction_circle::CorrectionCircle;
-use crate::game::object::full_screen_image::FullScreenImage;
 use crate::game::object::scoreboard::{Scoreboard, ScoreboardObject};
 use crate::game::object::special_balloon::{SpecialBalloon, SpecialBalloonEffect};
 use crate::game::object::timer::Timer;

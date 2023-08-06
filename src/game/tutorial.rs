@@ -1,6 +1,5 @@
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
-use std::sync::mpsc::TrySendError::Full;
 use macroquad::color::Color;
 use crate::client::init::InitPhase;
 use crate::client::Message;
@@ -66,7 +65,7 @@ impl Game for Tutorial {
         }
     }
 
-    fn on_message(&mut self, client: u32, message: Message, time: u32, sound_tx: &mut Sender<SoundType>) {
+    fn on_message(&mut self, _client: u32, _message: Message, _time: u32, _sound_tx: &mut Sender<SoundType>) {
     }
 
     fn objects(&mut self, _time: u32) -> Vec<ObjectWrapper> {

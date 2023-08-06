@@ -21,11 +21,11 @@ impl CorrectionCircle {
 }
 
 impl Object for CorrectionCircle {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
+    fn draw(&self, center: Coord, _age: u32, _window_size: (f32, f32), _texture_store: Arc<TextureStore>) {
         draw_circle(center.0, center.1, 20.0, GREEN);
     }
 
-    fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
+    fn pos(&self, _age: u32, window_size: (f32, f32)) -> Coord {
         let (w, h) = window_size;
         if self.is_left {
             (w / 2. -  h / 2., h / 2.)
@@ -46,14 +46,14 @@ impl Object for CorrectionCircle {
         0
     }
 
-    fn shoot_check(&self, coord: Coord, time: u32, window_size: (f32, f32)) -> Option<Coord> {
+    fn shoot_check(&self, _coord: Coord, _time: u32, _window_size: (f32, f32)) -> Option<Coord> {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut Sender<SoundType>) {
+    fn shoot(&mut self, _coord: Coord, _time: u32, _client: u32, _scoreboard: &mut Scoreboard, _sound_tx: &mut Sender<SoundType>) {
     }
 
-    fn can_be_cleaned(&self, time: u32) -> bool {
+    fn can_be_cleaned(&self, _time: u32) -> bool {
         false
     }
 }

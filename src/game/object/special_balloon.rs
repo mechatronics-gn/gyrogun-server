@@ -96,9 +96,11 @@ impl Object for SpecialBalloon {
 
     fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut Sender<SoundType>) {
         self.base.shoot(coord, time, client, scoreboard, sound_tx);
-        if let SpecialBalloonEffect::MultiplyScore(by, duration) = self.effect {
-            scoreboard.add_multiplication(by, client, time + duration);
-        }
+
+        // if let SpecialBalloonEffect::MultiplyScore(by, duration) = self.effect {
+        let SpecialBalloonEffect::MultiplyScore(by, duration) = self.effect;
+        scoreboard.add_multiplication(by, client, time + duration);
+        // }
     }
 
     fn can_be_cleaned(&self, time: u32) -> bool {

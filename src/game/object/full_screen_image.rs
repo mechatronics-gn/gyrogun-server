@@ -21,14 +21,14 @@ impl FullScreenImage {
 }
 
 impl Object for FullScreenImage {
-    fn draw(&self, center: Coord, age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
+    fn draw(&self, _center: Coord, _age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         draw_texture_ex(texture_store.full_screen_image(self.image_idx), 0., 0., WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: window_size.0, y: window_size.1 }),
             source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
         })
     }
 
-    fn pos(&self, age: u32, window_size: (f32, f32)) -> Coord {
+    fn pos(&self, _age: u32, _window_size: (f32, f32)) -> Coord {
         (0., 0.)
     }
 
@@ -44,14 +44,14 @@ impl Object for FullScreenImage {
         0
     }
 
-    fn shoot_check(&self, coord: Coord, time: u32, window_size: (f32, f32)) -> Option<Coord> {
+    fn shoot_check(&self, _coord: Coord, _time: u32, _window_size: (f32, f32)) -> Option<Coord> {
         None
     }
 
-    fn shoot(&mut self, coord: Coord, time: u32, client: u32, scoreboard: &mut Scoreboard, sound_tx: &mut Sender<SoundType>) {
+    fn shoot(&mut self, _coord: Coord, _time: u32, _client: u32, _scoreboard: &mut Scoreboard, _sound_tx: &mut Sender<SoundType>) {
     }
 
-    fn can_be_cleaned(&self, time: u32) -> bool {
+    fn can_be_cleaned(&self, _time: u32) -> bool {
         false
     }
 }

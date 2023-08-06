@@ -1,9 +1,7 @@
 use std::error::Error;
 use std::{env, thread};
-use std::os::unix::raw::time_t;
 use std::str::FromStr;
 use std::time::Duration;
-use macroquad::window::next_frame;
 use tokio::net::TcpListener;
 
 use gyrogun_server::client;

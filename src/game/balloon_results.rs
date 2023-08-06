@@ -5,7 +5,7 @@ use crate::client::Message;
 use crate::game::balloon_game::BalloonGame;
 use crate::game::Game;
 use crate::game::object::{Object, ObjectWrapper};
-use crate::game::object::balloon::{Balloon, BalloonColor};
+use crate::game::object::balloon::Balloon;
 use crate::game::object::cloud::Cloud;
 use crate::game::object::game_result::GameResult;
 use crate::player_to_balloon_color;

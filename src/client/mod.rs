@@ -23,7 +23,7 @@ pub enum Message {
 pub async fn handle(
     mut socket: TcpStream, addr: SocketAddr, index: u32,
     msg_tx: mpsc::Sender<(u32, Message)>,
-    mut next_phase_rx: watch::Receiver<Option<InitPhase>>,
+    next_phase_rx: watch::Receiver<Option<InitPhase>>,
     done_phase_tx: watch::Sender<Option<InitPhase>>,
     window_size: (f32, f32),
 ) -> watch::Receiver<PosCoord> {
@@ -77,9 +77,9 @@ pub async fn handle(
                     }
                 }
 
-                if let RawMessage::DoubleClick(_) = raw_message { // Temporary
-                    phase = Some(init::InitPhase::WaitMonitor);
-                }
+                // if let RawMessage::DoubleClick(_) = raw_message { // Temporary
+                //     phase = Some(init::InitPhase::WaitMonitor);
+                // }
             } else {
                 msg_tx.send((index, Message::Disconnect)).await.unwrap();
             }
