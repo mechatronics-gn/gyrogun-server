@@ -2,12 +2,13 @@ use std::f32::consts::PI;
 use std::net::SocketAddr;
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, watch};
-use crate::client::init::InitPhase;
+use crate::client::init::{InitData, InitPhase};
 use crate::client::raw_message::RawMessage;
 
 pub mod fake;
 pub mod init;
 mod raw_message;
+pub mod position_manager;
 
 type SensorData = (f32, f32, f32);
 pub type PosCoord = (f32, f32);
@@ -21,27 +22,29 @@ pub enum Message {
 }
 
 pub async fn handle(
-    mut socket: TcpStream, addr: SocketAddr, index: u32,
+    mut tcp_sock: TcpStream, addr: SocketAddr, index: u32,
     msg_tx: mpsc::Sender<(u32, Message)>,
     next_phase_rx: watch::Receiver<Option<InitPhase>>,
     done_phase_tx: watch::Sender<Option<InitPhase>>,
+    init_data_tx: watch::Sender<Option<InitData>>,
     window_size: (f32, f32),
-) -> watch::Receiver<PosCoord> {
+) {
     println!("Handling connection of client #{index}, {addr}");
-
-    let (pos_tx, pos_rx) = watch::channel((0.0, 0.0));
 
     tokio::spawn(async move {
         let mut phase;
-        let mut init_data = init::InitData::new(window_size);
+        let mut init_data = InitData::new(window_size);
         let mut shooter: ShooterCoord = (0.0, 0.0, 0.0);
 
         loop {
-            let raw_message = RawMessage::read(&mut socket).await;
+            let raw_message = RawMessage::read(&mut tcp_sock).await;
             phase = *next_phase_rx.borrow();
 
-            if let None = &phase {
+            if let None = &phase { /* Initialize is done and game is running */
                 done_phase_tx.send(None).unwrap();
+                init_data_tx.send(Some(init_data)).unwrap();
+            } else { /* Initialize under progress */
+                init_data_tx.send(None).unwrap();
             }
 
             if let Some(raw_message) = raw_message {
@@ -68,10 +71,12 @@ pub async fn handle(
                         done_phase_tx.send(Some(*p)).unwrap();
                     }
                 } else {
-                    if let RawMessage::Position(data) = raw_message {
-                        let pos = screen_pos(&init_data, data, shooter);
-                        pos_tx.send(pos).unwrap();
-                    } else if let RawMessage::Click(data) = raw_message {
+                    // if let RawMessage::Position(data) = raw_message {
+                    //     let pos = screen_pos(&init_data, data, shooter);
+                    //     pos_tx.send(pos).unwrap();
+                    //
+                    // } else
+                    if let RawMessage::Click(data) = raw_message {
                         let pos = screen_pos(&init_data, data, shooter);
                         msg_tx.send((index, Message::Click(reverse_fix_pos(pos, window_size)))).await.unwrap();
                     }
@@ -85,8 +90,6 @@ pub async fn handle(
             }
         }
     });
-
-    pos_rx
 }
 
 /*

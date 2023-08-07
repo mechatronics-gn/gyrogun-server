@@ -6,6 +6,7 @@ use tokio::net::TcpListener;
 
 use gyrogun_server::client;
 use gyrogun_server::client::init::InitPhase;
+use gyrogun_server::client::position_manager::PositionManager;
 use gyrogun_server::game::{Game};
 use gyrogun_server::game::balloon_game::BalloonGame;
 use gyrogun_server::game::balloon_results::BalloonResults;
@@ -20,11 +21,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let client_count = args.get(1).and_then(|x| i32::from_str(x).ok()).unwrap_or(1);
     let width = args.get(2).and_then(|x| f32::from_str(x).ok()).unwrap_or(1920.0);
     let height = args.get(3).and_then(|x| f32::from_str(x).ok()).unwrap_or(1080.0);
-    let addr = args.get(4).and_then(|x| Some(x.as_str())).unwrap_or("0.0.0.0:11076");
+    let server_addr = args.get(4).and_then(|x| Some(x.as_str())).unwrap_or("0.0.0.0:11076");
 
     let window_size = (width, height);
 
-    let listener = TcpListener::bind(&addr).await?;
+    let listener = TcpListener::bind(&server_addr).await?;
+    let mut pos_man = PositionManager::new();
 
     let (msg_tx, mut msg_rx) = tokio::sync::mpsc::channel(128);
 
@@ -41,17 +43,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if client_count > 0 {
         let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
         for i in 0..client_count {
-            let (socket, addr) = listener.accept().await.unwrap();
+            let (tcp_sock, addr) = listener.accept().await.unwrap();
+            let (init_data_tx, pos_rx) = pos_man.register(addr);
 
             let (next_phase_tx, next_phase_rx) = tokio::sync::watch::channel(None);
             let (done_phase_tx, done_phase_rx) = tokio::sync::watch::channel(None);
-            let pos_rx = client::handle(socket, addr, i as u32, msg_tx.clone(), next_phase_rx, done_phase_tx, window_size).await;
+            client::handle(tcp_sock, addr, i as u32, msg_tx.clone(), next_phase_rx, done_phase_tx, init_data_tx, window_size).await;
 
             pos_rxs.push(pos_rx);
             next_phase_txs.push(next_phase_tx);
             done_phase_rxs.push(done_phase_rx);
         }
 
+        let server_addr = String::from(server_addr);
+        tokio::spawn(async move {
+            pos_man.run(&server_addr).await;
+        });
         gyrogun_server::display::launch(pos_rxs, window_size, None, objects_rx, time_rx, bg_color_rx, sounds_rx);
     } else {
         let fake_client_count = -client_count;

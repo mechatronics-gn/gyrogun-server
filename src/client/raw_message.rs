@@ -3,6 +3,8 @@ use tokio::net::TcpStream;
 use crate::client::SensorData;
 
 pub enum RawMessage {
+    #[deprecated]
+    #[allow(dead_code)]
     Position(SensorData),
     Click(SensorData),
     DoubleClick(SensorData),
@@ -33,7 +35,7 @@ impl RawMessage {
         //println!("{message_type} {y} {p} {r}");
 
         if message_type == 0 {
-            return Some(RawMessage::Position((y, p, r)));
+            // return Some(RawMessage::Position((y, p, r)));
         } else if message_type == 1 {
             return Some(RawMessage::Click((y, p, r)));
         } else if message_type == 2 {

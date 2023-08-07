@@ -8,6 +8,7 @@ pub enum InitPhase {
     Finalize,
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct InitData {
     window_size: (f32, f32),
     monitor: SensorData,
