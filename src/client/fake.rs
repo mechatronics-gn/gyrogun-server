@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use tokio::sync::watch;
 use super::PosCoord;
 
@@ -13,13 +14,13 @@ pub fn handle(
     msg_tx: tokio::sync::mpsc::Sender<(u32, super::Message)>,
     count: i32,
     window_size: (f32, f32),
-) -> Vec<watch::Receiver<PosCoord>> {
-    let mut ret = vec![];
+) -> HashMap<u32, watch::Receiver<PosCoord>> {
+    let mut ret = HashMap::new();
     let mut pos_txs = vec![];
 
-    for _ in 0..count {
+    for i in 0..count {
         let (pos_tx, pos_rx) = watch::channel((0.0, 0.0));
-        ret.push(pos_rx);
+        ret.insert(i as u32, pos_rx);
         pos_txs.push(pos_tx);
     }
 

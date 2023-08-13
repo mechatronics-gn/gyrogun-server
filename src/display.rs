@@ -2,6 +2,7 @@ use std::thread;
 use macroquad::prelude::*;
 use macroquad::Window;
 use mpsc::Sender;
+use std::collections::HashMap;
 use tokio::sync::watch;
 use std::sync::{Arc, mpsc};
 use macroquad::audio::play_sound_once;
@@ -12,7 +13,7 @@ use crate::sound::{SoundStore, SoundType};
 use crate::texture::TextureStore;
 
 pub fn launch(
-    pos_rxs: Vec<watch::Receiver<PosCoord>>,
+    pos_rxs: HashMap<u32, watch::Receiver<PosCoord>>,
     window_size: (f32, f32),
     fake_input_tx: Option<Sender<fake::RawMessage>>,
     objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
@@ -39,7 +40,7 @@ pub fn launch(
 }
 
 async fn draw(
-    mut pos_rxs: Vec<watch::Receiver<PosCoord>>,
+    mut pos_rxs: HashMap<u32, watch::Receiver<PosCoord>>,
     window_size: (f32, f32),
     fake_input_tx: Option<Sender<fake::RawMessage>>,
     objects_rx: watch::Receiver<Vec<ObjectWrapper>>,
@@ -113,15 +114,13 @@ async fn draw(
             }
         }
 
-        let mut i = 0;
-        for pos_rx in &mut pos_rxs {
+        for (i, pos_rx) in &mut pos_rxs {
             let (x, y) = *pos_rx.borrow_and_update();
-            let crosshair = texture_store.crosshair(i % 4);
+            let crosshair = texture_store.crosshair(*i as i32 % 4);
             draw_texture_ex(crosshair, width / 2.0 + x - width / 48.0, height / 2.0 - y - height / 27.0, WHITE, DrawTextureParams {
                 dest_size: Some(Vec2 { x: width / 36.0, y: height / 20.25 }),
                 source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
             });
-            i += 1;
         }
 
         draw_text(format!("FPS: {:03}", get_fps()).as_str(), 50.0, 50.0, 80.0, if get_fps() < 60 { RED } else { BLACK });

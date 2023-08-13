@@ -8,6 +8,7 @@ pub enum RawMessage {
     Position(SensorData),
     Click(SensorData),
     DoubleClick(SensorData),
+    SetIndex(u32),
 }
 
 impl RawMessage {
@@ -22,6 +23,13 @@ impl RawMessage {
 
         let message_type = [buf[0], buf[1], buf[2], buf[3]];
         let message_type = i32::from_be_bytes(message_type);
+
+        if message_type == 3 {
+            let idx = [buf[4], buf[5], buf[6], buf[7]];
+            let idx = u32::from_be_bytes(idx);
+
+            return Some(RawMessage::SetIndex(idx));
+        }
 
         let y = [buf[4], buf[5], buf[6], buf[7]];
         let y = f32::from_be_bytes(y);

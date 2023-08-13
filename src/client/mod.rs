@@ -1,7 +1,8 @@
 use std::f32::consts::PI;
 use std::net::SocketAddr;
+use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
-use tokio::sync::{mpsc, watch};
+use tokio::sync::{mpsc, oneshot, watch};
 use crate::client::init::{InitData, InitPhase};
 use crate::client::raw_message::RawMessage;
 
@@ -22,19 +23,27 @@ pub enum Message {
 }
 
 pub async fn handle(
-    mut tcp_sock: TcpStream, addr: SocketAddr, index: u32,
+    mut tcp_sock: TcpStream, addr: SocketAddr,
     msg_tx: mpsc::Sender<(u32, Message)>,
     next_phase_rx: watch::Receiver<Option<InitPhase>>,
     done_phase_tx: watch::Sender<Option<InitPhase>>,
     init_data_tx: watch::Sender<Option<InitData>>,
     window_size: (f32, f32),
-) {
-    println!("Handling connection of client #{index}, {addr}");
+) -> u32 {
+    println!("Handling connection of client {addr}");
+
+    let (index_tx, index_rx) = oneshot::channel();
 
     tokio::spawn(async move {
         let mut phase;
         let mut init_data = InitData::new(window_size);
         let mut shooter: ShooterCoord = (0.0, 0.0, 0.0);
+        let Some(RawMessage::SetIndex(index)) = RawMessage::read(&mut tcp_sock).await else {
+            println!("Client {addr} didn't advertise its index as its first message - maybe old client. Dropping.");
+            tcp_sock.shutdown().await.unwrap();
+            return;
+        };
+        index_tx.send(index).unwrap();
 
         loop {
             let raw_message = RawMessage::read(&mut tcp_sock).await;
@@ -90,6 +99,8 @@ pub async fn handle(
             }
         }
     });
+
+    index_rx.await.unwrap()
 }
 
 /*

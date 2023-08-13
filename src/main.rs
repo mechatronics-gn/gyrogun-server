@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::{env, thread};
+use std::collections::HashMap;
 use std::str::FromStr;
 use std::time::Duration;
 use tokio::net::TcpListener;
@@ -38,21 +39,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (mut sounds_tx, sounds_rx) = std::sync::mpsc::channel();
 
 
-    let mut next_phase_txs = vec![];
-    let mut done_phase_rxs = vec![];
+    let mut next_phase_txs = HashMap::new();
+    let mut done_phase_rxs = HashMap::new();
     if client_count > 0 {
-        let mut pos_rxs: Vec<tokio::sync::watch::Receiver<(f32, f32)>> = vec![];
-        for i in 0..client_count {
+        let mut pos_rxs: HashMap<u32, tokio::sync::watch::Receiver<(f32, f32)>> = HashMap::new();
+        for _ in 0..client_count {
             let (tcp_sock, addr) = listener.accept().await.unwrap();
             let (init_data_tx, pos_rx) = pos_man.register(addr);
 
             let (next_phase_tx, next_phase_rx) = tokio::sync::watch::channel(None);
             let (done_phase_tx, done_phase_rx) = tokio::sync::watch::channel(None);
-            client::handle(tcp_sock, addr, i as u32, msg_tx.clone(), next_phase_rx, done_phase_tx, init_data_tx, window_size).await;
+            let index = client::handle(tcp_sock, addr, msg_tx.clone(), next_phase_rx, done_phase_tx, init_data_tx, window_size).await;
 
-            pos_rxs.push(pos_rx);
-            next_phase_txs.push(next_phase_tx);
-            done_phase_rxs.push(done_phase_rx);
+            pos_rxs.insert(index, pos_rx);
+            next_phase_txs.insert(index, next_phase_tx);
+            done_phase_rxs.insert(index, done_phase_rx);
         }
 
         let server_addr = String::from(server_addr);
@@ -82,13 +83,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut tutorial = Tutorial::new(init_phase.unwrap());
             let mut time = 0;
             loop {
-                for i in &mut done_phase_rxs {
-                    i.borrow_and_update();
-
+                for (_, recv) in &mut done_phase_rxs {
+                    recv.borrow_and_update();
                 }
 
-                for i in &next_phase_txs {
-                    i.send(init_phase).unwrap();
+                for (_, send) in &next_phase_txs {
+                    send.send(init_phase).unwrap();
                 }
 
                 println!("sent next phase tx {:?}", init_phase);
@@ -96,8 +96,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let mut x: Vec<InitPhase>;
                 loop {
                     let mut flag = false;
-                    for i in &done_phase_rxs {
-                        let x = i.borrow();
+                    for (_, recv) in &done_phase_rxs {
+                        let x = recv.borrow();
                         if x.is_none() {
                             flag = true;
                         }
@@ -105,7 +105,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     if !flag {
                         println!("Flag false; checking done phase rxs");
-                        x = done_phase_rxs.iter().map(|x| x.borrow().unwrap()).collect();
+                        x = done_phase_rxs.iter().map(|(_, x)| x.borrow().unwrap()).collect();
                         if x.iter().all(|t| *t == x[0]) {
                             break;
                         }
@@ -145,8 +145,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         time += 100;
                         single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
 
-                        for i in &next_phase_txs {
-                            i.send(init_phase).unwrap();
+                        for (_, send) in &next_phase_txs {
+                            send.send(init_phase).unwrap();
                         }
 
                         break;

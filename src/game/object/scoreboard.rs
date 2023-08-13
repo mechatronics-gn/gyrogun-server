@@ -70,13 +70,13 @@ impl ScoreboardObject {
         let scores = scoreboard.scores();
         let mut sum = 0;
         for i in &scores {
-            sum += i + 1;
+            sum += i;
         }
 
         Self {
             birth_time: time,
             start_state: previous.current_state(time).unwrap(),
-            target_state: scores.iter().map(|x| (x + 1) as f32 / sum as f32 * window_size.0).collect(),
+            target_state: scores.iter().map(|x| if sum == 0 {1. / scores.len() as f32} else {*x as f32 / sum as f32} * window_size.0).collect(),
             animation_duration,
             scores,
         }
