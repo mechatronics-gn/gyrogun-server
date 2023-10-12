@@ -97,30 +97,38 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 println!("sent next phase tx {:?}", init_phase);
 
-                let mut x: Vec<InitPhase>;
+                let mut x: Vec<(u32, InitPhase)>;
                 loop {
                     let mut flag = false;
-                    for (_, recv) in &done_phase_rxs {
+                    for (idx, recv) in &done_phase_rxs {
                         let x = recv.borrow();
                         if x.is_none() {
                             flag = true;
+                            tutorial.update_init_state(*idx as i32, false);
                         }
                     }
 
                     if !flag {
-                        println!("Flag false; checking done phase rxs");
-                        x = done_phase_rxs.iter().map(|(_, x)| x.borrow().unwrap()).collect();
-                        if x.iter().all(|t| *t == x[0]) {
+                        x = done_phase_rxs.iter().map(|(idx, x)| (*idx, x.borrow().unwrap())).collect();
+                        let mut flag = true;
+                        for (idx, x) in &x {
+                            if init_phase.map_or(false, |y| *x == y ) {
+                                tutorial.update_init_state(*idx as i32, true);
+                            } else {
+                                flag = false;
+                                tutorial.update_init_state(*idx as i32, false);
+                            }
+                        }
+                        if flag {
                             break;
                         }
-                        println!("Did not break");
                     }
 
                     single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     thread::sleep(Duration::from_millis(10));
                 }
 
-                match x[0] {
+                match x[0].1 {
                     InitPhase::WaitMonitor => {
                         println!("Initphase is waitmonitor and going to exit here");
                         init_phase = Some(InitPhase::WaitFirstPoint);

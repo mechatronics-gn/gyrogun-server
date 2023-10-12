@@ -12,6 +12,7 @@ pub mod timer;
 pub mod game_result;
 pub mod full_screen_image;
 pub mod correction_circle;
+pub mod init_indicator;
 
 type Coord = (f32, f32);
 

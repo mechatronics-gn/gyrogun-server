@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::mpsc::Sender;
 use macroquad::color::Color;
@@ -7,6 +8,7 @@ use crate::game::Game;
 use crate::game::object::{Object, ObjectWrapper};
 use crate::game::object::correction_circle::CorrectionCircle;
 use crate::game::object::full_screen_image::FullScreenImage;
+use crate::game::object::init_indicator::InitIndicator;
 use crate::sound::SoundType;
 
 pub struct Tutorial {
@@ -15,6 +17,9 @@ pub struct Tutorial {
     last_change_delay: u32,
     objects: Vec<Arc<Box<dyn Object + Send + Sync>>>,
     objects_was_updated: bool,
+    last_init_indicator: InitIndicator,
+    init_state: HashMap<i32, bool>,
+    init_state_was_updated: bool,
 }
 
 impl Tutorial {
@@ -25,6 +30,9 @@ impl Tutorial {
             last_change_delay: 0,
             objects: vec![],
             objects_was_updated: true,
+            last_init_indicator: InitIndicator::new(HashMap::new()),
+            init_state: HashMap::new(),
+            init_state_was_updated: true,
         }
     }
 
@@ -34,6 +42,19 @@ impl Tutorial {
         self.last_change_delay = delay;
     }
 
+    fn was_init_state_updated(&mut self) -> bool {
+        if self.init_state_was_updated {
+            self.init_state_was_updated = false;
+            return true;
+        }
+        false
+    }
+
+    pub fn update_init_state(&mut self, index: i32, state: bool) {
+        self.init_state.insert(index, state);
+        self.init_state_was_updated = true;
+        self.objects_was_updated = true;
+    }
 }
 
 impl Game for Tutorial {
@@ -69,7 +90,15 @@ impl Game for Tutorial {
     }
 
     fn objects(&mut self, _time: u32) -> Vec<ObjectWrapper> {
-        self.objects.iter().map(|x| ObjectWrapper::Weak(Arc::downgrade(x))).collect()
+        let mut ret: Vec<ObjectWrapper> = self.objects.iter().map(|x| ObjectWrapper::Weak(Arc::downgrade(x))).collect();
+        if self.was_init_state_updated() {
+            let init_indicator = InitIndicator::new(self.init_state.clone());
+            ret.push(ObjectWrapper::Arc(Arc::new(Box::new(init_indicator.clone()))));
+            self.last_init_indicator = init_indicator;
+        } else {
+            ret.push(ObjectWrapper::Arc(Arc::new(Box::new(self.last_init_indicator.clone()))));
+        }
+        ret
     }
 
     fn add_objects(&mut self, object: Arc<Box<dyn Object + Send + Sync>>) {

@@ -117,6 +117,6 @@ impl TextureStore {
     }
 
     pub fn loader(&self) -> Texture2D {
-        *self.store.get("loader.png").unwrap()
+        *self.store.get("loader").unwrap()
     }
 }
