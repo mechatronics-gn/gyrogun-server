@@ -71,6 +71,13 @@ impl TextureStore {
         map.insert("fsi-3".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/fsi3.png"), Some(ImageFormat::Png)));
         map.insert("fsi-4".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/fsi4.png"), Some(ImageFormat::Png)));
 
+        map.insert("checkmark-red".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/checkmark_red.png"), Some(ImageFormat::Png)));
+        map.insert("checkmark-green".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/checkmark_green.png"), Some(ImageFormat::Png)));
+        map.insert("checkmark-yellow".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/checkmark_yellow.png"), Some(ImageFormat::Png)));
+        map.insert("checkmark-blue".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/checkmark_blue.png"), Some(ImageFormat::Png)));
+
+        map.insert("loader".to_string(), Texture2D::from_file_with_format(include_bytes!("../res/loader.png"), Some(ImageFormat::Png)));
+
         TextureStore {
             store: map
         }
@@ -103,5 +110,13 @@ impl TextureStore {
 
     pub fn full_screen_image(&self, idx: i32) -> Texture2D {
         self.store.get(format!("fsi-{}", idx).as_str()).map_or(Texture2D::empty(), |x| *x)
+    }
+
+    pub fn checkmark(&self, variant: i32) -> Texture2D {
+        self.store.get(format!("checkmark-{}", match variant { 0 => { "red" }, 1 => { "green" }, 2 => { "yellow" }, 3 => { "blue" }, _ => { "" } }).as_str()).map_or(Texture2D::empty(), |x| *x)
+    }
+
+    pub fn loader(&self) -> Texture2D {
+        *self.store.get("loader.png").unwrap()
     }
 }
