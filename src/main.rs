@@ -43,7 +43,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut done_phase_rxs = HashMap::new();
     if client_count > 0 {
         let mut pos_rxs: HashMap<u32, tokio::sync::watch::Receiver<(f32, f32)>> = HashMap::new();
-        for _ in 0..client_count {
+        let mut successes = 0;
+        while successes < client_count {
             let (tcp_sock, addr) = listener.accept().await.unwrap();
             let (init_data_tx, pos_rx) = pos_man.register(addr);
 
@@ -51,9 +52,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let (done_phase_tx, done_phase_rx) = tokio::sync::watch::channel(None);
             let index = client::handle(tcp_sock, addr, msg_tx.clone(), next_phase_rx, done_phase_tx, init_data_tx, window_size).await;
 
-            pos_rxs.insert(index, pos_rx);
-            next_phase_txs.insert(index, next_phase_tx);
-            done_phase_rxs.insert(index, done_phase_rx);
+            if let Some(index) = index {
+                pos_rxs.insert(index, pos_rx);
+                next_phase_txs.insert(index, next_phase_tx);
+                done_phase_rxs.insert(index, done_phase_rx);
+                successes += 1;
+            }
         }
 
         let server_addr = String::from(server_addr);

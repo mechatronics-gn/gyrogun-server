@@ -29,7 +29,7 @@ pub async fn handle(
     done_phase_tx: watch::Sender<Option<InitPhase>>,
     init_data_tx: watch::Sender<Option<InitData>>,
     window_size: (f32, f32),
-) -> u32 {
+) -> Option<u32> {
     println!("Handling connection of client {addr}");
 
     let (index_tx, index_rx) = oneshot::channel();
@@ -41,9 +41,10 @@ pub async fn handle(
         let Some(RawMessage::SetIndex(index)) = RawMessage::read(&mut tcp_sock).await else {
             println!("Client {addr} didn't advertise its index as its first message - maybe old client. Dropping.");
             tcp_sock.shutdown().await.unwrap();
+            index_tx.send(None).unwrap();
             return;
         };
-        index_tx.send(index).unwrap();
+        index_tx.send(Some(index)).unwrap();
 
         loop {
             let raw_message = RawMessage::read(&mut tcp_sock).await;
