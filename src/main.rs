@@ -133,29 +133,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         println!("Initphase is waitmonitor and going to exit here");
                         init_phase = Some(InitPhase::WaitFirstPoint);
                         tutorial.update_init_phase(InitPhase::WaitFirstPoint, time, 80);
-                        thread::sleep(Duration::from_secs(1));
-                        time += 100;
-                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     }
                     InitPhase::WaitFirstPoint => {
                         init_phase = Some(InitPhase::WaitSecondPoint);
                         tutorial.update_init_phase(InitPhase::WaitSecondPoint, time, 80);
-                        thread::sleep(Duration::from_secs(1));
-                        time += 100;
-                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     }
                     InitPhase::WaitSecondPoint => {
                         init_phase = Some(InitPhase::Finalize);
                         tutorial.update_init_phase(InitPhase::Finalize, time, 80);
-                        thread::sleep(Duration::from_secs(1));
-                        time += 100;
-                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                     }
                     InitPhase::Finalize => {
                         init_phase = None;
-                        thread::sleep(Duration::from_secs(1));
-                        time += 100;
-                        single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
+                        let time_target = time + 100;
+                        while time < time_target {
+                            thread::sleep(Duration::from_millis(10));
+                            time += 1;
+                            single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
+                        }
 
                         for (_, send) in &next_phase_txs {
                             send.send(init_phase).unwrap();
@@ -163,6 +157,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                         break;
                     }
+                }
+                let time_target = time + 100;
+                while time < time_target {
+                    thread::sleep(Duration::from_millis(10));
+                    time += 1;
+                    single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
                 }
             }
         }
