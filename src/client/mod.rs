@@ -75,6 +75,7 @@ pub async fn handle(
                             }
                             InitPhase::Finalize => {
                                 shooter = shooter_pos(&init_data);
+                                init_data_tx.send(Some(init_data)).unwrap();
                                 println!("Wait finalize {index} done")
                             }
                         }
