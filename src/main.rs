@@ -145,10 +145,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     InitPhase::Finalize => {
                         init_phase = None;
                         let time_target = time + 100;
-                        while time < time_target {
-                            thread::sleep(Duration::from_millis(10));
-                            time += 1;
+                        while time <= time_target {
                             single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
+                            thread::sleep(Duration::from_millis(10));
                         }
 
                         for (_, send) in &next_phase_txs {
@@ -159,10 +158,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
                 let time_target = time + 100;
-                while time < time_target {
-                    thread::sleep(Duration::from_millis(10));
-                    time += 1;
+                while time <= time_target {
                     single_frame(&mut tutorial, &mut time, &mut disconnect_count, client_count, &mut msg_rx, &mut sounds_tx, &time_tx, &bg_color_tx, &objects_tx);
+                    thread::sleep(Duration::from_millis(10));
                 }
             }
         }
