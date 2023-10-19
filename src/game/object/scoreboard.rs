@@ -13,7 +13,7 @@ pub struct Scoreboard {
 impl Scoreboard {
     pub fn new(client_count: u32) -> Self {
         Self {
-            scores: vec![0; client_count as usize],
+            scores: vec![0; 4],
             multiplications: vec![]
         }
     }
