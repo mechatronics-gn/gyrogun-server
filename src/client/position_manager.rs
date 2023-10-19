@@ -35,7 +35,10 @@ impl PositionManager {
         loop {
             let mut buf = [0 as u8; 12];
             if let Ok((_, client_addr)) = sock.recv_from(&mut buf).await {
-                let Some(init_data) = self.init_datas.get(&client_addr.ip().to_string()).map(|x| *x.borrow()).flatten() else { continue; };
+                let Some(init_data) = self.init_datas.get(&client_addr.ip().to_string()).map(|x| *x.borrow()).flatten() else {
+                    self.pos_txs.get(&client_addr.ip().to_string()).map(|x| x.send((-500., -500.)));
+                    continue;
+                };
 
                 let y = [buf[0], buf[1], buf[2], buf[3]];
                 let y = f32::from_be_bytes(y);
