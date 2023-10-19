@@ -46,6 +46,8 @@ pub async fn handle(
         };
         index_tx.send(Some(index)).unwrap();
 
+        println!("Client {addr} connected with id {index}");
+
         loop {
             let raw_message = RawMessage::read(&mut tcp_sock).await;
             phase = *next_phase_rx.borrow();
@@ -126,7 +128,6 @@ fn shooter_pos(init_data: &init::InitData) -> ShooterCoord {
     let a_tan = ((monitor_yaw - a_yaw + 90.0) * PI / 180.0).tan();
     let b_tan = ((monitor_yaw - b_yaw + 90.0) * PI / 180.0).tan();
     let h_tan = (avg_pitch * PI / 180.0).tan();
-    println!("a_tan {a_tan} b_tan {b_tan}");
 
     let x = (a_tan + b_tan) / (a_tan - b_tan) * (-init_data.window_size().1 / 2.0);
     let y = a_tan * (x + init_data.window_size().1 / 2.0);
