@@ -27,6 +27,9 @@ impl Object for InitIndicator {
         for (i, val) in &self.state {
             let x = x - 0.225 * window_size.0 + 0.15 * *i as f32 * window_size.0;
 
+            let x = x - window_size.0 * 0.05;
+            let y  = y - window_size.0 * 0.05;
+
             if *val {
                 draw_texture_ex(texture_store.checkmark(*i), x, y, WHITE, DrawTextureParams {
                     dest_size: Some(Vec2 { x: window_size.0 * 0.1, y: window_size.0 * 0.1 }),
@@ -42,7 +45,7 @@ impl Object for InitIndicator {
     }
 
     fn pos(&self, _age: u32, window_size: (f32, f32)) -> Coord {
-        (window_size.0 * 0.5, window_size.1 * 0.5)
+        (window_size.0 * 0.5, window_size.1 * 0.15)
     }
 
     fn depth(&self) -> Depth {
