@@ -22,7 +22,7 @@ impl FullScreenImage {
 
 impl Object for FullScreenImage {
     fn draw(&self, _center: Coord, _age: u32, window_size: (f32, f32), texture_store: Arc<TextureStore>) {
-        draw_texture_ex(&texture_store.full_screen_image(self.image_idx), 0., 0., WHITE, DrawTextureParams {
+        draw_texture_ex(texture_store.full_screen_image(self.image_idx), 0., 0., WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: window_size.0, y: window_size.1 }),
             source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
         })
