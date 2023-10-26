@@ -72,7 +72,7 @@ async fn draw(
 
         while let Some(x) = sounds_rx.try_iter().next() {
             if let Some(sound) = sound_store.get(&x) {
-                play_sound_once(sound);
+                play_sound_once(&sound);
             }
         }
 
@@ -117,7 +117,7 @@ async fn draw(
         for (i, pos_rx) in &mut pos_rxs {
             let (x, y) = *pos_rx.borrow_and_update();
             let crosshair = texture_store.crosshair(*i as i32 % 4);
-            draw_texture_ex(crosshair, width / 2.0 + x - width / 48.0, height / 2.0 - y - height / 27.0, WHITE, DrawTextureParams {
+            draw_texture_ex(&crosshair, width / 2.0 + x - width / 48.0, height / 2.0 - y - height / 27.0, WHITE, DrawTextureParams {
                 dest_size: Some(Vec2 { x: width / 36.0, y: height / 20.25 }),
                 source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
             });

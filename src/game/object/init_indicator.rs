@@ -31,12 +31,12 @@ impl Object for InitIndicator {
             let y  = y - window_size.0 * 0.05;
 
             if *val {
-                draw_texture_ex(texture_store.checkmark(*i), x, y, WHITE, DrawTextureParams {
+                draw_texture_ex(&texture_store.checkmark(*i), x, y, WHITE, DrawTextureParams {
                     dest_size: Some(Vec2 { x: window_size.0 * 0.1, y: window_size.0 * 0.1 }),
                     source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
                 })
             } else {
-                draw_texture_ex(texture_store.loader(), x, y, WHITE, DrawTextureParams {
+                draw_texture_ex(&texture_store.loader(), x, y, WHITE, DrawTextureParams {
                     dest_size: Some(Vec2 { x: window_size.0 * 0.1, y: window_size.0 * 0.1}),
                     source: None, rotation: (age % 60) as f32 * PI / 30., flip_x: false, flip_y: false, pivot: None,
                 })

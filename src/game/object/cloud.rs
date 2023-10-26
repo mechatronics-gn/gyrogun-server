@@ -28,7 +28,7 @@ impl Cloud {
 impl Object for Cloud {
     fn draw(&self, center: Coord, _age: u32, _window_size: (f32, f32), texture_store: Arc<TextureStore>) {
         let (x, y) = center;
-        draw_texture_ex(texture_store.cloud(self.variant), x-self.width()/2.0, y-self.height/2.0, WHITE, DrawTextureParams {
+        draw_texture_ex(&texture_store.cloud(self.variant), x-self.width()/2.0, y-self.height/2.0, WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: self.width(), y: self.height }),
             source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
         });

@@ -1,5 +1,5 @@
 use std::error::Error;
-use std::{env, thread};
+use std::env;
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::time::Duration;

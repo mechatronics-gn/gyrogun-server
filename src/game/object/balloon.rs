@@ -34,7 +34,7 @@ impl Balloon {
     }
 
     pub(super) fn draw_balloon(&self, x: f32, y: f32, texture: Texture2D) {
-        draw_texture_ex(texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
+        draw_texture_ex(&texture, x - self.radius * 2.61125 / 2.0, y - self.radius * 1.17557 , WHITE, DrawTextureParams {
             dest_size: Some(Vec2 { x: self.radius * 2.61125, y: self.radius * 2.61125 }),
             source: None, rotation: 0.0, flip_x: false, flip_y: false, pivot: None,
         });
@@ -64,13 +64,13 @@ impl Balloon {
     pub(super) fn draw_string(&self, x: f32, y: f32, variant: i32, flip: bool, texture_store: Arc<TextureStore>) {
         if variant == 1 {
             let string = texture_store.balloon_string(1);
-            draw_texture_ex(string, x - self.radius * 0.95914 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
+            draw_texture_ex(&string, x - self.radius * 0.95914 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
                 dest_size: Some(Vec2 { x: self.radius * 0.95914, y: self.radius * 1.6834}),
                 source: None, rotation: 0.0, flip_x: flip, flip_y: false, pivot: None,
             })
         } else if variant == 2 {
             let string = texture_store.balloon_string(2);
-            draw_texture_ex(string, x - self.radius * 0.08881 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
+            draw_texture_ex(&string, x - self.radius * 0.08881 / 2.0, y + self.radius * 1.1882, WHITE, DrawTextureParams {
                 dest_size: Some(Vec2 { x: self.radius * 0.08881, y: self.radius * 2.2076}),
                 source: None, rotation: 0.0, flip_x: false, flip_y: false,  pivot: None,
             } )

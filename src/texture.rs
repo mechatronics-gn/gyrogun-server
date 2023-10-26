@@ -84,7 +84,7 @@ impl TextureStore {
     }
 
     pub fn crosshair(&self, variant: i32) -> Texture2D {
-        self.store.get(format!("crosshair-{}", match variant { 0 => { "red" }, 1 => { "green" }, 2 => { "yellow" }, 3 => { "blue" }, _ => { "" } }).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("crosshair-{}", match variant { 0 => { "red" }, 1 => { "green" }, 2 => { "yellow" }, 3 => { "blue" }, _ => { "" } }).as_str()).map_or(Texture2D::empty(), |x| x.clone())
     }
 
     pub fn balloon(&self, color: &BalloonColor, variant: i32) -> Texture2D {
@@ -97,26 +97,26 @@ impl TextureStore {
             BalloonColor::Red => { "red" }
             BalloonColor::Yellow => { "yellow" }
         };
-        self.store.get(format!("balloon-{}-{}", color, variant).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("balloon-{}-{}", color, variant).as_str()).map_or(Texture2D::empty(), |x| x.clone())
     }
 
     pub fn balloon_string(&self, variant: i32) -> Texture2D {
-        self.store.get(format!("balloon-string-{}", variant).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("balloon-string-{}", variant).as_str()).map_or(Texture2D::empty(), |x| x.clone())
     }
     
     pub fn cloud(&self, variant: i32) -> Texture2D {
-        self.store.get(format!("cloud-{}", variant).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("cloud-{}", variant).as_str()).map_or(Texture2D::empty(), |x| x.clone())
     }
 
     pub fn full_screen_image(&self, idx: i32) -> Texture2D {
-        self.store.get(format!("fsi-{}", idx).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("fsi-{}", idx).as_str()).map_or(Texture2D::empty(), |x| x.clone())
     }
 
     pub fn checkmark(&self, variant: i32) -> Texture2D {
-        self.store.get(format!("checkmark-{}", match variant { 0 => { "red" }, 1 => { "green" }, 2 => { "yellow" }, 3 => { "blue" }, _ => { "" } }).as_str()).map_or(Texture2D::empty(), |x| *x)
+        self.store.get(format!("checkmark-{}", match variant { 0 => { "red" }, 1 => { "green" }, 2 => { "yellow" }, 3 => { "blue" }, _ => { "" } }).as_str()).map_or(Texture2D::empty(), |x| x.clone())
     }
 
     pub fn loader(&self) -> Texture2D {
-        *self.store.get("loader").unwrap()
+        self.store.get("loader").unwrap().clone()
     }
 }

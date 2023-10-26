@@ -22,6 +22,6 @@ impl SoundStore {
     }
 
     pub fn get(&self, sound_type: &SoundType) -> Option<Sound> {
-        self.store.get(sound_type).map_or(None, |x| Some(*x))
+        self.store.get(sound_type).map_or(None, |x| Some(x.clone()))
     }
 }
