@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-macroquad = { version = "0.4.4", features = ["audio"] }
+macroquad = "0.4.4"
 rand = "0.8.5"
 spin_sleep = "1.1.1"
