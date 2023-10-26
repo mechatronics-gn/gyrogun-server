@@ -9,3 +9,4 @@ edition = "2021"
 tokio = { version = "1", features = ["full"] }
 macroquad = "0.3"
 rand = "0.8.5"
+spin_sleep = "1.1.1"
